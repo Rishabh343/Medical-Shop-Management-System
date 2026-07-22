@@ -1,13 +1,43 @@
 import mongoose from "mongoose";
+
 const supplierSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    contact: { type: String, required: true },
-    address: { type: String, required: true },
-    gstNumber: { type: String, required: true },
+    supplierName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    contactNumber: {
+      type: String,
+      required: true,
+    },
+
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+
+    address: {
+      type: String,
+      required: true,
+    },
+
+    gstNumber: {
+      type: String,
+      required: true,
+      uppercase: true,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  }
 );
-const supplierModel = mongoose.model("supplierModel", supplierSchema);
-export default supplierModel;
+
+export default mongoose.model("Supplier", supplierSchema);
