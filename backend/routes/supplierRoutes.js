@@ -5,7 +5,7 @@ import {
   getAllSuppliers,
   getSupplierById,
   updateSupplier,
-} from "../controllers/supplierController";
+} from "../controllers/supplierController.js";
 
 const supplierRouter = express.Router();
 supplierRouter.post("/create", createSupplier);

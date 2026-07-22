@@ -1,4 +1,5 @@
-import Supplier from "../models/supplier.model.js";
+import supplierModel from "../models/supplierModel.js";
+
 export const createSupplier = async (req, res) => {
   try {
     const { supplierName, contactNumber, email, address, gstNumber } = req.body;
@@ -10,7 +11,7 @@ export const createSupplier = async (req, res) => {
       });
     }
 
-    const supplierExists = await Supplier.findOne({
+    const supplierExists = await supplierModel.findOne({
       supplierName: supplierName.trim(),
     });
 
@@ -21,7 +22,7 @@ export const createSupplier = async (req, res) => {
       });
     }
 
-    const supplier = await Supplier.create({
+    const supplier = await supplierModel.create({
       supplierName,
       contactNumber,
       email,
@@ -43,7 +44,7 @@ export const createSupplier = async (req, res) => {
 };
 export const getAllSuppliers = async (req, res) => {
   try {
-    const suppliers = await Supplier.find().sort({ createdAt: -1 });
+    const suppliers = await supplierModel.find().sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -59,7 +60,7 @@ export const getAllSuppliers = async (req, res) => {
 };
 export const getSupplierById = async (req, res) => {
   try {
-    const supplier = await Supplier.findById(req.params.id);
+    const supplier = await supplierModel.findById(req.params.id);
 
     if (!supplier) {
       return res.status(404).json({
@@ -81,7 +82,7 @@ export const getSupplierById = async (req, res) => {
 };
 export const updateSupplier = async (req, res) => {
   try {
-    const supplier = await Supplier.findByIdAndUpdate(
+    const supplier = await supplierModel.findByIdAndUpdate(
       req.params.id,
       req.body,
       {
@@ -113,7 +114,7 @@ export const updateSupplier = async (req, res) => {
 
 export const deleteSupplier = async (req, res) => {
   try {
-    const supplier = await Supplier.findById(req.params.id);
+    const supplier = await supplierModel.findById(req.params.id);
 
     if (!supplier) {
       return res.status(404).json({

@@ -3,7 +3,7 @@ import {
   createPurchase,
   getPurchaseById,
   getPurchases,
-} from "../controllers/purchaseController";
+} from "../controllers/purchaseController.js";
 
 const purchaseRouter = express.Router();
 purchaseRouter.post("/create", createPurchase);

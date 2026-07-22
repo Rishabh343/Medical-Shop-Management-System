@@ -1,4 +1,4 @@
-import supplierModel from "../models/supplierModel";
+import purchaseModel from "../models/purchaseModel.js";
 
 export const createPurchase = async (req, res) => {
   try {
@@ -27,7 +27,7 @@ export const createPurchase = async (req, res) => {
         },
       });
     }
-    const purchase = await Purchase.create({
+    const purchase = await purchaseModel.create({
       supplier,
       invoiceNuumber,
       purchaseDate,
@@ -49,7 +49,7 @@ export const createPurchase = async (req, res) => {
 };
 export const getPurchases = async (req, res) => {
   try {
-    const purchases = await Purchase.find()
+    const purchases = await purchaseModel.find()
       .populate("supplier", "supplierName")
       .populate("items.medicine", "medicineName")
       .sort({ createdAt: -1 });
@@ -67,7 +67,7 @@ export const getPurchases = async (req, res) => {
 };
 export const getPurchaseById = async (req, res) => {
   try {
-    const purchase = await Purchase.findById(req.params.id)
+    const purchase = await purchaseModel.findById(req.params.id)
       .populate("supplier")
       .populate("items.medicine");
 

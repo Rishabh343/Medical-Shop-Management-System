@@ -1,4 +1,4 @@
-import Customer from "../models/customer.model.js";
+import customerModel from "../models/customerModel.js";
 export const createCustomer = async (req, res) => {
   try {
     const { name, phoneNumber, email, address } = req.body;
@@ -10,7 +10,7 @@ export const createCustomer = async (req, res) => {
       });
     }
 
-    const customerExists = await Customer.findOne({ phoneNumber });
+    const customerExists = await customerModel.findOne({ phoneNumber });
 
     if (customerExists) {
       return res.status(409).json({
@@ -19,7 +19,7 @@ export const createCustomer = async (req, res) => {
       });
     }
 
-    const customer = await Customer.create({
+    const customer = await customerModel.create({
       name,
       phoneNumber,
       email,
@@ -41,7 +41,7 @@ export const createCustomer = async (req, res) => {
 
 export const getAllCustomers = async (req, res) => {
   try {
-    const customers = await Customer.find().sort({ createdAt: -1 });
+    const customers = await customerModel.find().sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -58,7 +58,7 @@ export const getAllCustomers = async (req, res) => {
 
 export const getCustomerById = async (req, res) => {
   try {
-    const customer = await Customer.findById(req.params.id);
+    const customer = await customerModel.findById(req.params.id);
 
     if (!customer) {
       return res.status(404).json({
@@ -81,10 +81,14 @@ export const getCustomerById = async (req, res) => {
 
 export const updateCustomer = async (req, res) => {
   try {
-    const customer = await Customer.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const customer = await customerModel.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
 
     if (!customer) {
       return res.status(404).json({
@@ -108,7 +112,7 @@ export const updateCustomer = async (req, res) => {
 
 export const deleteCustomer = async (req, res) => {
   try {
-    const customer = await Customer.findById(req.params.id);
+    const customer = await customerModel.findById(req.params.id);
 
     if (!customer) {
       return res.status(404).json({
@@ -135,7 +139,7 @@ export const searchCustomer = async (req, res) => {
   try {
     const { keyword } = req.query;
 
-    const customers = await Customer.find({
+    const customers = await customerModel.find({
       $or: [
         { name: { $regex: keyword, $options: "i" } },
         { phoneNumber: { $regex: keyword, $options: "i" } },
