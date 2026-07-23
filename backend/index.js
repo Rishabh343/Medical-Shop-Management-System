@@ -9,6 +9,7 @@ import router from "./routes/userRoutes.js";
 import medicineRouter from "./routes/medicineRoutes.js";
 import supplierRouter from "./routes/supplierRoutes.js";
 import purchaseRouter from "./routes/purchaseRoute.js";
+import inventoryRouter from "./routes/inventoryRoutes.js";
 app.use(cookieParser());
 dotenv.config();
 app.use(cors());
@@ -19,6 +20,7 @@ app.use("/api/user", router);
 app.use("/api/medicine", medicineRouter);
 app.use("/api/supplier", supplierRouter);
 app.use("/api/purchase", purchaseRouter);
+app.use("/api/inventory", inventoryRouter);
 app.use("/uploads", express.static("uploads"));
 app.get("/", (req, res) => {
   res.send("comming from backend");
