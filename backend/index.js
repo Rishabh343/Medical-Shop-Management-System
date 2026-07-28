@@ -9,7 +9,8 @@ import router from "./routes/userRoutes.js";
 import medicineRouter from "./routes/medicineRoutes.js";
 import supplierRouter from "./routes/supplierRoutes.js";
 import inventoryRouter from "./routes/inventoryRoutes.js";
-import billingRouter from "./routes/billingRoutes.js";
+import billingRouter from "./routes/billingroutes.js";
+
 
 dotenv.config();
 
