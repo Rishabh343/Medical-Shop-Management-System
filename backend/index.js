@@ -1,39 +1,45 @@
 import express from "express";
-const app = express();
 import dotenv from "dotenv";
-import { connectDB } from "./config/db.js";
-// import { router } from "./routes/userRoutes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+
+import { connectDB } from "./config/db.js";
+
 import router from "./routes/userRoutes.js";
 import medicineRouter from "./routes/medicineRoutes.js";
 import supplierRouter from "./routes/supplierRoutes.js";
-import purchaseRouter from "./routes/purchaseRoute.js";
 import inventoryRouter from "./routes/inventoryRoutes.js";
-app.use(cookieParser());
+import billingRouter from "./routes/billingRoutes.js";
+
 dotenv.config();
-app.use(cors());
-connectDB();
+
+const app = express();
 const port = process.env.PORT || 3000;
+
+connectDB();
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
+
+app.use(cookieParser());
 app.use(express.json());
+
 app.use("/api/user", router);
 app.use("/api/medicine", medicineRouter);
 app.use("/api/supplier", supplierRouter);
-app.use("/api/purchase", purchaseRouter);
 app.use("/api/inventory", inventoryRouter);
+app.use("/api/billing", billingRouter);
+
 app.use("/uploads", express.static("uploads"));
+
 app.get("/", (req, res) => {
-  res.send("comming from backend");
+  res.send("Coming from backend");
 });
 
 app.listen(port, () => {
-  try {
-    console.log("server is connected");
-  } catch (error) {
-    console.log(error);
-  }
+  console.log(`Server is running on port ${port}`);
 });
-// {
-//     origin: "http://localhost:5173",
-//     credentials: true,
-//   }

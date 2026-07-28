@@ -2,20 +2,27 @@ import express from "express";
 import {
   addMedicine,
   deleteMedicine,
+  updateMedicine,
+  searchMedicine,
   filterMedicine,
   getAllMedicine,
   getOneMedicine,
-  searchMedicine,
-  updateMedicine,
 } from "../controllers/medicineController.js";
 
 const medicineRouter = express.Router();
-medicineRouter.post("/add", addMedicine);
-medicineRouter.get("/getAll", getAllMedicine);
-medicineRouter.get("/getone/:id", getOneMedicine);
-medicineRouter.delete("/delete/:id", deleteMedicine);
-medicineRouter.put("/update/:id", updateMedicine);
+
+medicineRouter.post("/", addMedicine);
+
+medicineRouter.get("/", getAllMedicine);
+
 medicineRouter.get("/search", searchMedicine);
+
 medicineRouter.get("/filter", filterMedicine);
+
+medicineRouter.get("/:id", getOneMedicine);
+
+medicineRouter.put("/:id", updateMedicine);
+
+medicineRouter.delete("/:id", deleteMedicine);
 
 export default medicineRouter;

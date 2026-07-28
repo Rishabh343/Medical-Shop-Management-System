@@ -1,12 +1,11 @@
-import inventoryModel from "../models/inventoryModel.js";
+import medicineModel from "../models/medicineModel.js";
 
 export const getAllInventory = async (req, res) => {
   try {
-    const inventory = await inventoryModel
+    const inventory = await medicineModel
       .find()
-      .populate("medicine", "medicineName category")
       .populate("supplier", "supplierName")
-      .populate("purchase", "invoiceNumber purchaseDate");
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       status: true,
@@ -23,21 +22,101 @@ export const getAllInventory = async (req, res) => {
 
 export const getInventoryByMedicine = async (req, res) => {
   try {
-    const inventory = await inventoryModel
-      .find({ medicine: req.params.medicineId })
-      .populate("medicine", "medicineName category")
+    const medicine = await medicineModel
+      .findById(req.params.id)
       .populate("supplier", "supplierName");
 
-    if (!inventory.length) {
+    if (!medicine) {
       return res.status(404).json({
         status: false,
-        message: "Medicine not found in inventory",
+        message: "Medicine not found",
       });
     }
 
     res.status(200).json({
       status: true,
-      data: inventory,
+      data: medicine,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+export const increaseStock = async (req, res) => {
+  try {
+    const { quantity } = req.body;
+
+    if (!quantity || quantity <= 0) {
+      return res.status(400).json({
+        status: false,
+        message: "Enter a valid quantity",
+      });
+    }
+
+    const medicine = await medicineModel.findById(req.params.id);
+
+    if (!medicine) {
+      return res.status(404).json({
+        status: false,
+        message: "Medicine not found",
+      });
+    }
+
+    medicine.stockQuantity += Number(quantity);
+
+    await medicine.save();
+
+    res.status(200).json({
+      status: true,
+      message: "Stock increased successfully",
+      data: medicine,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+export const adjustStock = async (req, res) => {
+  try {
+    const { quantity } = req.body;
+
+    if (!quantity || quantity <= 0) {
+      return res.status(400).json({
+        status: false,
+        message: "Enter a valid quantity",
+      });
+    }
+
+    const medicine = await medicineModel.findById(req.params.id);
+
+    if (!medicine) {
+      return res.status(404).json({
+        status: false,
+        message: "Medicine not found",
+      });
+    }
+
+    if (medicine.stockQuantity < quantity) {
+      return res.status(400).json({
+        status: false,
+        message: "Insufficient stock",
+      });
+    }
+
+    medicine.stockQuantity -= Number(quantity);
+
+    await medicine.save();
+
+    res.status(200).json({
+      status: true,
+      message: "Stock adjusted successfully",
+      data: medicine,
     });
   } catch (error) {
     res.status(500).json({
@@ -49,18 +128,37 @@ export const getInventoryByMedicine = async (req, res) => {
 
 export const getLowStock = async (req, res) => {
   try {
-    const inventory = await inventoryModel
+    const medicines = await medicineModel
       .find({
-        availableQuantity: { $lte: 10 },
-        status: { $ne: "Expired" },
+        stockQuantity: { $lte: 10 },
       })
-      .populate("medicine", "medicineName")
       .populate("supplier", "supplierName");
 
     res.status(200).json({
       status: true,
       message: "Low stock medicines",
-      data: inventory,
+      data: medicines,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getOutOfStock = async (req, res) => {
+  try {
+    const medicines = await medicineModel
+      .find({
+        stockQuantity: 0,
+      })
+      .populate("supplier", "supplierName");
+
+    res.status(200).json({
+      status: true,
+      message: "Out of stock medicines",
+      data: medicines,
     });
   } catch (error) {
     res.status(500).json({
@@ -72,19 +170,16 @@ export const getLowStock = async (req, res) => {
 
 export const getExpiredInventory = async (req, res) => {
   try {
-    const today = new Date();
-
-    const inventory = await inventoryModel
+    const medicines = await medicineModel
       .find({
-        expiryDate: { $lt: today },
+        expiryDate: { $lt: new Date() },
       })
-      .populate("medicine", "medicineName")
       .populate("supplier", "supplierName");
 
     res.status(200).json({
       status: true,
       message: "Expired medicines",
-      data: inventory,
+      data: medicines,
     });
   } catch (error) {
     res.status(500).json({
@@ -101,20 +196,19 @@ export const getNearExpiryInventory = async (req, res) => {
     const next30Days = new Date();
     next30Days.setDate(today.getDate() + 30);
 
-    const inventory = await inventoryModel
+    const medicines = await medicineModel
       .find({
         expiryDate: {
           $gte: today,
           $lte: next30Days,
         },
       })
-      .populate("medicine", "medicineName")
       .populate("supplier", "supplierName");
 
     res.status(200).json({
       status: true,
       message: "Near expiry medicines",
-      data: inventory,
+      data: medicines,
     });
   } catch (error) {
     res.status(500).json({

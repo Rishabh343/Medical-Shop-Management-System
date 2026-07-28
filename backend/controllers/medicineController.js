@@ -2,31 +2,123 @@ import medicineModel from "../models/medicineModel.js";
 
 export const addMedicine = async (req, res) => {
   try {
-    const response = await medicineModel.create({ ...req.body });
-    return res.status(201).json({
+    const existingMedicine = await medicineModel.findOne({
+      medicineName: req.body.medicineName,
+      batchNumber: req.body.batchNumber,
+    });
+
+    if (existingMedicine) {
+      return res.status(400).json({
+        status: false,
+        message: "Medicine already exists",
+      });
+    }
+
+    const medicine = await medicineModel.create(req.body);
+
+    res.status(201).json({
       status: true,
       message: "Medicine added successfully",
-      data: response,
+      data: medicine,
     });
   } catch (error) {
     res.status(500).json({
       status: false,
-      message: "Medicine not added, check console",
-      error: error.message,
+      message: error.message,
     });
   }
 };
-export const deleteMedicine = async (req, res) => {
+
+export const getAllMedicine = async (req, res) => {
   try {
-    const medicine = await medicineModel.findById(req.params.id);
+    const medicines = await medicineModel
+      .find()
+      .populate("supplier", "supplierName")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      status: true,
+      count: medicines.length,
+      data: medicines,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getOneMedicine = async (req, res) => {
+  try {
+    const medicine = await medicineModel
+      .findById(req.params.id)
+      .populate("supplier", "supplierName");
+
     if (!medicine) {
       return res.status(404).json({
         status: false,
-        message: "Medicine not found, check console",
+        message: "Medicine not found",
       });
     }
-    await medicineModel.deleteOne(req.params.id);
-    return res.status(200).json({
+
+    res.status(200).json({
+      status: true,
+      data: medicine,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+export const updateMedicine = async (req, res) => {
+  try {
+    const { stockQuantity, ...updateData } = req.body;
+
+    const medicine = await medicineModel.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).populate("supplier", "supplierName");
+
+    if (!medicine) {
+      return res.status(404).json({
+        status: false,
+        message: "Medicine not found",
+      });
+    }
+
+    res.status(200).json({
+      status: true,
+      message: "Medicine updated successfully",
+      data: medicine,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+export const deleteMedicine = async (req, res) => {
+  try {
+    const medicine = await medicineModel.findByIdAndDelete(req.params.id);
+
+    if (!medicine) {
+      return res.status(404).json({
+        status: false,
+        message: "Medicine not found",
+      });
+    }
+
+    res.status(200).json({
       status: true,
       message: "Medicine deleted successfully",
       data: medicine,
@@ -34,113 +126,61 @@ export const deleteMedicine = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: false,
-      message: "Medicine not deleted, check console",
-      error: error.message,
+      message: error.message,
     });
   }
 };
-export const updateMedicine = async (req, res) => {
-  try {
-    const medicine = await medicineModel.findById(req.params.id);
-    if (!medicine) {
-      return res.status(404).json({
-        status: false,
-        message: "Medicine not found, check console",
-      });
-    }
-    await medicineModel.updateOne({ ...req.body });
-    return res.status(200).json({
-      status: true,
-      message: "Medicine updated successfully",
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: false,
-      message: "Medicine not updated, check console",
-      error: error.message,
-    });
-  }
-};
+
 export const searchMedicine = async (req, res) => {
   try {
-    const { keyword } = req.body;
-    const response = await medicineModel.find({
-      $or: [
-        { medicineName: { $regex: keyword, options: "i" } },
-        { genericName: { $regex: keyword, options: "i" } },
-      ],
-    });
+    const { keyword } = req.query;
+
+    const medicines = await medicineModel
+      .find({
+        $or: [
+          { medicineName: { $regex: keyword, $options: "i" } },
+          { genericName: { $regex: keyword, $options: "i" } },
+          { company: { $regex: keyword, $options: "i" } },
+        ],
+      })
+      .populate("supplier", "supplierName");
+
     res.status(200).json({
-      success: true,
-      count: response.length,
-      data: response,
+      status: true,
+      count: medicines.length,
+      data: medicines,
     });
   } catch (error) {
     res.status(500).json({
       status: false,
-      message: "Medicine not searched, check console",
-      error: error.message,
+      message: error.message,
     });
   }
 };
+
 export const filterMedicine = async (req, res) => {
   try {
-    const { category, company, expiryDate } = req.query;
+    const { category, company, supplier } = req.query;
+
     const filter = {};
-    if (category) {
-      filter.category = category;
-    }
-    if (company) {
-      filter.company = company;
-    }
-    if (expiryDate) {
-      filter.expiryDate = expiryDate;
-    }
-    const response = await medicineModel.find(filter);
+
+    if (category) filter.category = category;
+    if (company) filter.company = company;
+    if (supplier) filter.supplier = supplier;
+
+    const medicines = await medicineModel
+      .find(filter)
+      .populate("supplier", "supplierName");
+
     res.status(200).json({
-      success: true,
-      count: response.length,
-      data: response,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: false,
-      message: "Medicine not searched, check console",
-      error: error.message,
-    });
-  }
-};
-export const getAllMedicine = async (req, res) => {
-  try {
-    const medicine = await medicineModel.find();
-
-    return res.status(200).json({
       status: true,
-      message: "Medicine fetched successfully",
-      data: medicine,
+      count: medicines.length,
+      data: medicines,
     });
   } catch (error) {
     res.status(500).json({
       status: false,
-      message: "All Medicines are not fetched, check console",
-      error: error.message,
-    });
-  }
-};
-export const getOneMedicine = async (req, res) => {
-  try {
-    const medicine = await medicineModel.findById(req.params.id);
-
-    return res.status(200).json({
-      status: true,
-      message: "Medicine fetched successfully",
-      data: medicine,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: false,
-      message: "one Medicine are not fetched, check console",
-      error: error.message,
+      message: error.message,
     });
   }
 };

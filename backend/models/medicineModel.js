@@ -1,23 +1,99 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const medicineSchema = new mongoose.Schema(
   {
-    medicineName: { type: String, required: true },
-    genericName: { type: String, default: "" },
-    company: { type: String, required: true },
-    category: { type: String, required: true },
-    batchNumber: { type: Number, required: true },
-    manufacturingDate: { type: Date, default: "" },
-    expiryDate: { type: Date, default: "" },
-    puchasePrice: { type: Number, default: "" },
-    sellingPrice: { type: String, default: "" },
-    stockQuantity: { type: String, default: "" },
-    unit: { type: String, default: "" },
-    gstPercentage: { type: String, default: "" },
-    description: { type: String, default: "" },
-    medicineImage: { type: String, default: "" },
+    medicineName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    genericName: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    company: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    category: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    supplier: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "supplierModel",
+      required: true,
+    },
+
+    batchNumber: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    manufacturingDate: {
+      type: Date,
+      required: true,
+    },
+
+    expiryDate: {
+      type: Date,
+      required: true,
+    },
+
+    purchasePrice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    sellingPrice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    stockQuantity: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0,
+    },
+
+    unit: {
+      type: String,
+      enum: ["Tablet", "Capsule", "Bottle", "Strip", "Injection", "Tube", "Packet"],
+      required: true,
+    },
+
+    gstPercentage: {
+      type: Number,
+      default: 0,
+    },
+
+    description: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    medicineImage: {
+      type: String,
+      default: "",
+    },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  }
 );
+
 const medicineModel = mongoose.model("medicineModel", medicineSchema);
+
 export default medicineModel;
