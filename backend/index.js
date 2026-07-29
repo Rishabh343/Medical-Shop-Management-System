@@ -10,6 +10,7 @@ import medicineRouter from "./routes/medicineRoutes.js";
 import supplierRouter from "./routes/supplierRoutes.js";
 import inventoryRouter from "./routes/inventoryRoutes.js";
 import billingRouter from "./routes/billingroutes.js";
+import customerRouter from "./routes/customerRoutes.js";
 
 
 dotenv.config();
@@ -34,7 +35,7 @@ app.use("/api/medicine", medicineRouter);
 app.use("/api/supplier", supplierRouter);
 app.use("/api/inventory", inventoryRouter);
 app.use("/api/billing", billingRouter);
-
+app.use("/api/customer",customerRouter)
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -23,11 +25,28 @@ const Login = () => {
         loginData,
         {
           withCredentials: true,
-        }
+        },
       );
 
       alert(response.data.message);
       console.log(response.data);
+      const role = response.data.role;
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("role", role);
+      console.log(role);
+      if (role === "Admin") {
+        try {
+          navigate("/admin/dashboard");
+        } catch (error) {
+          console.log(error.message);
+        }
+      } else if (role === "Pharmasist") {
+        navigate("/pharmasist/dashboard");
+      }
+      setLoginData({
+        email: "",
+        password: "",
+      });
     } catch (error) {
       alert(error.response?.data?.message || "Login Failed");
     }

@@ -21,7 +21,7 @@ const billItemSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const billingSchema = new mongoose.Schema(
@@ -31,14 +31,10 @@ const billingSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    customerName: {
-      type: String,
+    customer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "customerModel",
       required: true,
-      trim: true,
-    },
-    customerPhone: {
-      type: String,
-      trim: true,
     },
     items: [billItemSchema],
     totalAmount: {
@@ -62,7 +58,7 @@ const billingSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default mongoose.model("billingModel", billingSchema);

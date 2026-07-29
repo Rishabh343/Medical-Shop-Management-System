@@ -1,16 +1,20 @@
 import billingModel from "../models/billingModel.js";
+import customerModel from "../models/customerModel.js";
 import medicineModel from "../models/medicineModel.js";
 
 export const createBill = async (req, res) => {
   try {
-    const {
-      billNumber,
-      customerName,
-      customerPhone,
-      paymentMethod,
-      paymentStatus,
-      items,
-    } = req.body;
+    const { billNumber, customer, paymentMethod, paymentStatus, items } =
+      req.body;
+
+    const customerExists = await customerModel.findById(customer);
+
+    if (!customerExists) {
+      return res.status(404).json({
+        status: false,
+        message: "Customer not found",
+      });
+    }
 
     let totalAmount = 0;
 
@@ -43,8 +47,7 @@ export const createBill = async (req, res) => {
 
     const bill = await billingModel.create({
       billNumber,
-      customerName,
-      customerPhone,
+      customer,
       paymentMethod,
       paymentStatus,
       items,
@@ -68,6 +71,7 @@ export const getAllBills = async (req, res) => {
   try {
     const bills = await billingModel
       .find()
+      .populate("customer", "customerName phone")
       .populate("items.medicine", "medicineName")
       .sort({ createdAt: -1 });
 
@@ -87,6 +91,7 @@ export const getBillById = async (req, res) => {
   try {
     const bill = await billingModel
       .findById(req.params.id)
+      .populate("customer", "customerName phone")
       .populate("items.medicine", "medicineName");
 
     if (!bill) {

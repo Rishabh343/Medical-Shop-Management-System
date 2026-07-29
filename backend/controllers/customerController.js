@@ -1,9 +1,9 @@
 import customerModel from "../models/customerModel.js";
 export const createCustomer = async (req, res) => {
   try {
-    const { name, phoneNumber, email, address } = req.body;
+    const { customerName, phoneNumber, email, address } = req.body;
 
-    if (!name || !phoneNumber) {
+    if (!customerName || !phoneNumber) {
       return res.status(400).json({
         success: false,
         message: "Name and Phone Number are required.",
@@ -20,7 +20,7 @@ export const createCustomer = async (req, res) => {
     }
 
     const customer = await customerModel.create({
-      name,
+      customerName,
       phoneNumber,
       email,
       address,
