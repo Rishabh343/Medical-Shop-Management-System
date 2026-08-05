@@ -22,7 +22,7 @@ connectDB();
 
 app.use(
   cors({
-    origin: "https://medical-shop-management-system-phi.vercel.app/",
+    origin: "https://medical-shop-management-system-phi.vercel.app",
     credentials: true,
   }),
 );
