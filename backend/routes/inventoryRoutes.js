@@ -8,16 +8,20 @@ import {
   getExpiredInventory,
   getNearExpiryInventory,
   getAllInventory,
+  searchInventory,
 } from "../controllers/inventoryController.js";
+import { auth } from "../middlewares/auth.js";
+import { isAdmin } from "../middlewares/isAdmin.js";
 
 const inventoryRouter = express.Router();
-inventoryRouter.get("/", getAllInventory);
-inventoryRouter.get("/low-stock", getLowStock);
-inventoryRouter.get("/out-of-stock", getOutOfStock);
-inventoryRouter.get("/expired", getExpiredInventory);
-inventoryRouter.get("/near-expiry", getNearExpiryInventory);
-inventoryRouter.get("/:id", getInventoryByMedicine);
-inventoryRouter.patch("/increase-stock/:id", increaseStock);
-inventoryRouter.patch("/adjust-stock/:id", adjustStock);
+inventoryRouter.get("/", auth, isAdmin, getAllInventory);
+inventoryRouter.get("/low-stock", auth, isAdmin, getLowStock);
+inventoryRouter.get("/out-of-stock", auth, isAdmin, getOutOfStock);
+inventoryRouter.get("/expired", auth, isAdmin, getExpiredInventory);
+inventoryRouter.get("/near-expiry", auth, isAdmin, getNearExpiryInventory);
+inventoryRouter.get("/search", auth, isAdmin, searchInventory);
+inventoryRouter.get("/:id", auth, isAdmin, getInventoryByMedicine);
+inventoryRouter.patch("/increase-stock/:id", auth, isAdmin, increaseStock);
+inventoryRouter.patch("/adjust-stock/:id", auth, isAdmin, adjustStock);
 
 export default inventoryRouter;

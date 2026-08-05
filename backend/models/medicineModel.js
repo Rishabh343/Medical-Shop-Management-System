@@ -20,12 +20,6 @@ const medicineSchema = new mongoose.Schema(
       trim: true,
     },
 
-    category: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
     supplier: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "supplierModel",
@@ -40,7 +34,7 @@ const medicineSchema = new mongoose.Schema(
 
     manufacturingDate: {
       type: Date,
-      required: true,
+      // required: true,
     },
 
     expiryDate: {
@@ -67,9 +61,17 @@ const medicineSchema = new mongoose.Schema(
       default: 0,
     },
 
-    unit: {
+    category: {
       type: String,
-      enum: ["Tablet", "Capsule", "Bottle", "Strip", "Injection", "Tube", "Packet"],
+      enum: [
+        "Tablet",
+        "Capsule",
+        "Bottle",
+        "Strip",
+        "Injection",
+        "Tube",
+        "Packet",
+      ],
       required: true,
     },
 
@@ -91,7 +93,7 @@ const medicineSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const medicineModel = mongoose.model("medicineModel", medicineSchema);

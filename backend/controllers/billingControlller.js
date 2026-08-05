@@ -2,14 +2,14 @@ import billingModel from "../models/billingModel.js";
 import customerModel from "../models/customerModel.js";
 import medicineModel from "../models/medicineModel.js";
 
+
 export const createBill = async (req, res) => {
   try {
-    const { billNumber, customer, paymentMethod, paymentStatus, items } =
-      req.body;
+    const { customerId, paymentMethod, medicines } = req.body;
 
-    const customerExists = await customerModel.findById(customer);
+    const customer = await customerModel.findById(customerId);
 
-    if (!customerExists) {
+    if (!customer) {
       return res.status(404).json({
         status: false,
         message: "Customer not found",
@@ -17,14 +17,15 @@ export const createBill = async (req, res) => {
     }
 
     let totalAmount = 0;
+    const items = [];
 
-    for (const item of items) {
-      const medicine = await medicineModel.findById(item.medicine);
+    for (const item of medicines) {
+      const medicine = await medicineModel.findById(item.medicineId);
 
       if (!medicine) {
         return res.status(404).json({
           status: false,
-          message: "Medicine not found",
+          message: `${item.medicineId} not found`,
         });
       }
 
@@ -35,21 +36,30 @@ export const createBill = async (req, res) => {
         });
       }
 
-      item.sellingPrice = medicine.sellingPrice;
-      item.totalPrice = medicine.sellingPrice * item.quantity;
-
-      totalAmount += item.totalPrice;
-
       medicine.stockQuantity -= item.quantity;
-
       await medicine.save();
+
+      const totalPrice = medicine.sellingPrice * item.quantity;
+
+      totalAmount += totalPrice;
+
+      items.push({
+        medicine: medicine._id,
+        quantity: item.quantity,
+        sellingPrice: medicine.sellingPrice,
+        totalPrice,
+      });
     }
+
+    const count = await billingModel.countDocuments();
+
+    const billNumber = `INV-${String(count + 1).padStart(5, "0")}`;
 
     const bill = await billingModel.create({
       billNumber,
-      customer,
+      customer: customerId,
       paymentMethod,
-      paymentStatus,
+      paymentStatus: "Paid",
       items,
       totalAmount,
     });

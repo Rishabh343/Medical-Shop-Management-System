@@ -15,7 +15,7 @@ export default function MainLayout() {
       <div className="flex flex-col flex-1 w-0 overflow-hidden">
         {/* Top Navbar */}
         <header className="sticky top-0 z-10 bg-white border-b border-gray-200">
-          <Navbar />
+          {/* <Navbar /> */}
         </header>
 
         {/* Dynamic Page Content Area */}

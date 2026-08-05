@@ -13,13 +13,13 @@ const medicineRouter = express.Router();
 
 medicineRouter.post("/", addMedicine);
 
-medicineRouter.get("/", getAllMedicine);
+medicineRouter.get("/get-all", getAllMedicine);
 
 medicineRouter.get("/search", searchMedicine);
 
 medicineRouter.get("/filter", filterMedicine);
 
-medicineRouter.get("/:id", getOneMedicine);
+medicineRouter.get("/getone/:id", getOneMedicine);
 
 medicineRouter.put("/:id", updateMedicine);
 

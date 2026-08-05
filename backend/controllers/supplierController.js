@@ -88,7 +88,7 @@ export const updateSupplier = async (req, res) => {
       {
         new: true,
         runValidators: true,
-      }
+      },
     );
 
     if (!supplier) {
@@ -110,7 +110,6 @@ export const updateSupplier = async (req, res) => {
     });
   }
 };
-
 
 export const deleteSupplier = async (req, res) => {
   try {
@@ -136,4 +135,22 @@ export const deleteSupplier = async (req, res) => {
     });
   }
 };
+export const searchSupplier = async (req, res) => {
+  try {
+    const { keyword } = req.query;
 
+    const supplier = await supplierModel.find({
+      $or: [{ supplierName: { $regex: keyword, $options: "i" } }],
+    });
+
+    res.status(200).json({
+      success: true,
+      supplier,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

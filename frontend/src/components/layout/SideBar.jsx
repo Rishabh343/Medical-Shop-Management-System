@@ -60,20 +60,11 @@ export default function SideBar() {
 
   const pharmacistMenu = [
     {
-      name: "Dashboard",
-      path: "/pharmasist/dashboard",
-      icon: <FaTachometerAlt />,
-    },
-    {
       name: "Medicines",
       path: "/pharmacist/medicine",
       icon: <FaPills />,
     },
-    {
-      name: "Inventory",
-      path: "/pharmacist/inventory",
-      icon: <FaWarehouse />,
-    },
+    
     {
       name: "Customers",
       path: "/pharmacist/customers",
@@ -84,11 +75,7 @@ export default function SideBar() {
       path: "/pharmacist/billing",
       icon: <FaFileInvoiceDollar />,
     },
-    {
-      name: "Reports",
-      path: "/pharmacist/reports",
-      icon: <FaChartBar />,
-    },
+   
   ];
 
   const menu = role === "admin" ? adminMenu : pharmacistMenu;

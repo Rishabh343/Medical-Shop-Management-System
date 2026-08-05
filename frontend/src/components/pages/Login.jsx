@@ -1,48 +1,42 @@
-import { useState } from "react";
-import axios from "axios";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../context/userContext";
 
-const Login = () => {
+export default function Login() {
   const navigate = useNavigate();
+
+  const { loginUser, loading } = useContext(UserContext);
+
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
   });
 
   const handleChange = (e) => {
-    setLoginData({
-      ...loginData,
+    setLoginData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/user/login",
-        loginData,
-        {
-          withCredentials: true,
-        },
-      );
+      const response = await loginUser(loginData);
 
-      alert(response.data.message);
-      console.log(response.data);
-      const role = response.data.role;
+      alert(response.message);
+
       localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("role", role);
-      console.log(role);
-      if (role === "Admin") {
-        try {
-          navigate("/admin/dashboard");
-        } catch (error) {
-          console.log(error.message);
-        }
-      } else if (role === "Pharmasist") {
-        navigate("/pharmasist/dashboard");
+      console.log(response.role);
+      if (response.role === "Admin") {
+        navigate("/admin/dashboard");
+      } else if (response.role === "Pharmacist") {
+        navigate("/pharmacist/medicine");
+      } else {
+        navigate("/");
       }
+
       setLoginData({
         email: "",
         password: "",
@@ -54,46 +48,79 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-sm bg-white shadow-lg rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">
+            Pharmacy Management
+          </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+          <p className="text-gray-500 mt-2">Login to your account</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block mb-1 font-medium">Email</label>
+            <label className="block mb-2 font-medium">Email</label>
+
             <input
               type="email"
               name="email"
               value={loginData.email}
               onChange={handleChange}
-              placeholder="Enter email"
-              className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter Email"
+              className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
               required
             />
           </div>
 
           <div>
-            <label className="block mb-1 font-medium">Password</label>
+            <label className="block mb-2 font-medium">Password</label>
+
             <input
               type="password"
               name="password"
               value={loginData.password}
               onChange={handleChange}
-              placeholder="Enter password"
-              className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter Password"
+              className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
               required
             />
           </div>
-
+          <div className="text-right">
+            <button
+              type="button"
+              onClick={() => navigate("/forgot-password")}
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              Forgot Password?
+            </button>
+          </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+            disabled={loading}
+            className={`w-full py-3 rounded-lg text-white font-semibold transition ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
-            Login
+            {loading ? "Logging In..." : "Login"}
           </button>
+
+          {/* Signup */}
+          <div className="text-center border-t pt-5">
+            <p className="text-gray-600">
+              Don't have an account?{" "}
+              <button
+                type="button"
+                onClick={() => navigate("/signup")}
+                className="text-blue-600 hover:text-blue-800 font-semibold"
+              >
+                Sign Up
+              </button>
+            </p>
+          </div>
         </form>
       </div>
     </div>
   );
-};
-
-export default Login;
+}

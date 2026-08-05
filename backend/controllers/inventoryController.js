@@ -19,7 +19,30 @@ export const getAllInventory = async (req, res) => {
     });
   }
 };
+export const searchInventory = async (req, res) => {
+  try {
+    const { keyword } = req.query;
 
+    const medicines = await medicineModel
+      .find({
+        medicineName: {
+          $regex: keyword,
+          $options: "i",
+        },
+      })
+      .populate("supplier", "supplierName");
+
+    res.status(200).json({
+      status: true,
+      data: medicines,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
 export const getInventoryByMedicine = async (req, res) => {
   try {
     const medicine = await medicineModel
