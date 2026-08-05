@@ -2,11 +2,16 @@ import billingModel from "../models/billingModel.js";
 import customerModel from "../models/customerModel.js";
 import medicineModel from "../models/medicineModel.js";
 
-
 export const createBill = async (req, res) => {
   try {
-    const { customerId, paymentMethod, medicines } = req.body;
+    const {
+      customerId,
+      paymentMethod,
+      medicines,
+      rewardPointsToRedeem = 0,
+    } = req.body;
 
+    // Find Customer
     const customer = await customerModel.findById(customerId);
 
     if (!customer) {
@@ -19,6 +24,7 @@ export const createBill = async (req, res) => {
     let totalAmount = 0;
     const items = [];
 
+    // Validate Medicines & Calculate Total
     for (const item of medicines) {
       const medicine = await medicineModel.findById(item.medicineId);
 
@@ -36,6 +42,7 @@ export const createBill = async (req, res) => {
         });
       }
 
+      // Reduce Stock
       medicine.stockQuantity -= item.quantity;
       await medicine.save();
 
@@ -50,11 +57,27 @@ export const createBill = async (req, res) => {
         totalPrice,
       });
     }
+    // Validate Reward Points
+    if (rewardPointsToRedeem > customer.rewardPoints) {
+      return res.status(400).json({
+        status: false,
+        message: "Insufficient Reward Points",
+      });
+    }
+    // Reward Discount
+    let discount = rewardPointsToRedeem;
 
+    if (discount > totalAmount) {
+      discount = totalAmount;
+    }
+    // Final Payable Amount
+    const finalAmount = totalAmount - discount;
+    // Earn Reward Points
+    const earnedPoints = Math.floor(finalAmount / 100);
+    // Invoice Number
     const count = await billingModel.countDocuments();
-
     const billNumber = `INV-${String(count + 1).padStart(5, "0")}`;
-
+    // Create Bill
     const bill = await billingModel.create({
       billNumber,
       customer: customerId,
@@ -62,11 +85,29 @@ export const createBill = async (req, res) => {
       paymentStatus: "Paid",
       items,
       totalAmount,
+      discount,
+      finalAmount,
+      rewardPointsEarned: earnedPoints,
+      rewardPointsRedeemed: rewardPointsToRedeem,
     });
+
+    // Update Customer
+    customer.rewardPoints =
+      customer.rewardPoints - rewardPointsToRedeem + earnedPoints;
+    customer.lifetimePurchase += finalAmount;
+    customer.totalOrders += 1;
+    customer.lastPurchase = new Date();
+    await customer.save();
 
     res.status(201).json({
       status: true,
       message: "Bill created successfully",
+      billNumber,
+      totalAmount,
+      discount,
+      finalAmount,
+      earnedPoints,
+      rewardPoints: customer.rewardPoints,
       data: bill,
     });
   } catch (error) {
@@ -101,7 +142,7 @@ export const getBillById = async (req, res) => {
   try {
     const bill = await billingModel
       .findById(req.params.id)
-      .populate("customer", "customerName phone")
+      .populate("customer")
       .populate("items.medicine", "medicineName");
 
     if (!bill) {

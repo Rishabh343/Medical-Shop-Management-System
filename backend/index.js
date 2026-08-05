@@ -12,6 +12,7 @@ import inventoryRouter from "./routes/inventoryRoutes.js";
 import billingRouter from "./routes/billingroutes.js";
 import customerRouter from "./routes/customerRoutes.js";
 import dashboardRouter from "./routes/dashboardRoutes.js";
+import reportRouter from "./routes/reportRoutes.js";
 
 dotenv.config();
 
@@ -22,11 +23,11 @@ connectDB();
 
 app.use(
   cors({
-    origin: "https://medical-shop-management-system-phi.vercel.app",
+    origin: "http://localhost:5173",
     credentials: true,
   }),
 );
-
+// https://medical-shop-management-system-phi.vercel.app
 app.use(cookieParser());
 app.use(express.json());
 
@@ -37,6 +38,7 @@ app.use("/api/inventory", inventoryRouter);
 app.use("/api/billing", billingRouter);
 app.use("/api/customer", customerRouter);
 app.use("/api/dashboard", dashboardRouter);
+app.use("/api/report", reportRouter);
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {

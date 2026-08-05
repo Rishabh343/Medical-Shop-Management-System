@@ -21,7 +21,7 @@ const billItemSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { _id: false },
+  { _id: false }
 );
 
 const billingSchema = new mongoose.Schema(
@@ -41,6 +41,22 @@ const billingSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    discount: {
+      type: Number,
+      default: 0,
+    },
+    finalAmount: {
+      type: Number,
+      required: true,
+    },
+    rewardPointsEarned: {
+      type: Number,
+      default: 0,
+    },
+    rewardPointsRedeemed: {
+      type: Number,
+      default: 0,
+    },
     paymentMethod: {
       type: String,
       enum: ["Cash", "UPI", "Card"],
@@ -58,7 +74,7 @@ const billingSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 export default mongoose.model("billingModel", billingSchema);

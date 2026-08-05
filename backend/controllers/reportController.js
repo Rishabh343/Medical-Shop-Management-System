@@ -1,7 +1,6 @@
 import billingModel from "../models/billingModel.js";
 import medicineModel from "../models/medicineModel.js";
-import billingModel from "../models/billingModel.js";
-import medicineModel from "../models/medicineModel.js";
+
 export const getTodaySalesReport = async (req, res) => {
   try {
     const start = new Date();

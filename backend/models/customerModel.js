@@ -18,13 +18,20 @@ const customerSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-
+    discount: {
+      type: Number,
+      default: 0,
+    },
     address: {
       type: String,
       default: "",
     },
 
     rewardPoints: {
+      type: Number,
+      default: 0,
+    },
+    lifetimePurchase: {
       type: Number,
       default: 0,
     },

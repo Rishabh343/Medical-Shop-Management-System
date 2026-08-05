@@ -34,13 +34,11 @@ export default function BillingProvider({ children }) {
       console.log(formData);
       const response = await api.post("/billing", formData);
       setBills((prev) => [response.data.data, ...prev]);
-      console.log(response.status);
-      console.log(response.data);
+       return response.data; 
       return response.data.data;
     } catch (error) {
-      console.log("Status:", error.response?.status);
-      console.log("URL:", error.config?.url);
-      console.log("Response:", error.response?.data);
+      console.log(error.response?.data);
+      throw error;
     }
   };
 
