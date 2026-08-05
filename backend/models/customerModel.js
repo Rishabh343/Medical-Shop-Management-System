@@ -28,6 +28,14 @@ const customerSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    totalOrders: {
+      type: Number,
+      default: 0,
+    },
+
+    lastPurchase: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
