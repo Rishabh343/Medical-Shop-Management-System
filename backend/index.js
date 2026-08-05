@@ -23,8 +23,9 @@ connectDB();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://medical-shop-management-system-phi.vercel.app",
     credentials: true,
+    // "http://localhost:5173",
   }),
 );
 // https://medical-shop-management-system-phi.vercel.app
