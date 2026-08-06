@@ -20,15 +20,28 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 connectDB();
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://medical-shop-management-system-phi.vercel.app",
+];
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, or postman)
+    if (!origin) return callback(null, true);
 
-app.use(
-  cors({
-    origin: "https://medical-shop-management-system-phi.vercel.app",
-    credentials: true,
-    // "http://localhost:5173",
-  }),
-);
-// https://medical-shop-management-system-phi.vercel.app
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // Keep this if you pass cookies/tokens
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+// 3. Apply the middleware before your routes
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
 

@@ -4,6 +4,7 @@ import {
   deleteCustomer,
   getAllCustomers,
   getCustomerById,
+  getCustomerPurchaseHistory,
   searchCustomer,
   updateCustomer,
 } from "../controllers/customerController.js";
@@ -15,6 +16,7 @@ customerRouter.post("/", createCustomer);
 customerRouter.get("/get", getAllCustomers);
 customerRouter.get("/search", searchCustomer);
 customerRouter.get("/:id", getCustomerById);
+customerRouter.get("/history/:id", getCustomerPurchaseHistory);
 customerRouter.put("/:id", updateCustomer);
-customerRouter.delete("/:id",auth,isAdmin, deleteCustomer);
+customerRouter.delete("/:id", auth, isAdmin, deleteCustomer);
 export default customerRouter;

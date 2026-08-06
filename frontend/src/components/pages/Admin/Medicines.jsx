@@ -5,6 +5,7 @@ import Modal from "../../common/Modal";
 import Loader from "../../common/Loader";
 import { MedicineContext } from "../../context/MedicineContext";
 import { SupplierContext } from "../../context/SupplierConrtext";
+import Pagination from "../../common/Pagination";
 
 export default function Medicines() {
   const {
@@ -13,6 +14,8 @@ export default function Medicines() {
     getMedicine,
     getByMedicineId,
     addMedicine,
+    currentPage,
+    totalPages,
     updateMedicine,
     deleteMedicine,
     searchMedicine,
@@ -28,6 +31,7 @@ export default function Medicines() {
 
   const [formData, setFormData] = useState({
     medicineName: "",
+    genericName: "",
     category: "",
     company: "",
     batchNumber: "",
@@ -40,13 +44,16 @@ export default function Medicines() {
   });
 
   useEffect(() => {
-    getMedicine();
+    getMedicine(1);
     getSupplier();
   }, []);
-
+  const handlePageChange = (page) => {
+    getMedicine(page);
+  };
   const resetForm = () => {
     setFormData({
       medicineName: "",
+      genericName: "",
       category: "",
       company: "",
       batchNumber: "",
@@ -78,6 +85,7 @@ export default function Medicines() {
 
       setFormData({
         medicineName: data.medicineName || "",
+        genericName: data.genericName || "",
         category: data.category || "",
         company: data.company || "",
         expiryDate: data.expiryDate ? data.expiryDate.substring(0, 10) : "",
@@ -123,16 +131,12 @@ export default function Medicines() {
     try {
       if (editing) {
         await updateMedicine(selectedId, formData);
-
         alert("Medicine Updated Successfully");
       } else {
         await addMedicine(formData);
-
         alert("Medicine Added Successfully");
       }
-
       await getMedicine();
-
       closeModal();
     } catch (error) {
       console.log(error);
@@ -142,9 +146,7 @@ export default function Medicines() {
   };
   const handleSearch = (e) => {
     const value = e.target.value;
-
     setSearch(value);
-
     if (value.trim() === "") {
       getMedicine();
     } else {
@@ -160,10 +162,8 @@ export default function Medicines() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Medicine Management</h1>
-
           <p className="text-gray-500">Manage all medicines.</p>
         </div>
-
         <button
           onClick={openAddModal}
           className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700"
@@ -187,7 +187,14 @@ export default function Medicines() {
             className="border rounded-lg p-2"
             required
           />
-
+          <input
+            name="genericName"
+            value={formData.genericName}
+            onChange={handleChange}
+            placeholder="Generic Name"
+            className="border rounded-lg p-2"
+            required
+          />
           <select
             name="category"
             value={formData.category}
@@ -208,7 +215,6 @@ export default function Medicines() {
             placeholder="Batch Number"
             className="border rounded-lg p-2"
           />
-
           <input
             type="company"
             name="company"
@@ -286,14 +292,14 @@ export default function Medicines() {
       <div className="bg-white shadow rounded-xl p-4 flex flex-col md:flex-row gap-4">
         <input
           type="text"
-          placeholder="Search medicine..."
+          placeholder="Search medicine by name or genric name..."
           value={search}
           onChange={handleSearch}
           className="flex-1 border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
         />
 
         <select
-          onChange={(e) => filterMedicine(e.target.value,"")}
+          onChange={(e) => filterMedicine(e.target.value, "")}
           className="border rounded-lg px-4 py-2"
         >
           <option value="">All Categories</option>
@@ -311,7 +317,7 @@ export default function Medicines() {
               <th className="p-3">#</th>
 
               <th className="p-3 text-left">Medicine</th>
-
+              <th className="p-3 text-left">Generic Name</th>
               <th className="p-3 text-left">Category</th>
 
               <th className="p-3 text-left">Company</th>
@@ -319,8 +325,6 @@ export default function Medicines() {
               <th className="p-3 text-left">Batch</th>
 
               <th className="p-3 text-center">Stock</th>
-
-              <th className="p-3 text-center">Purchase</th>
 
               <th className="p-3 text-center">Selling</th>
 
@@ -339,7 +343,7 @@ export default function Medicines() {
                   <td className="p-3">{index + 1}</td>
 
                   <td className="p-3 font-medium">{item.medicineName}</td>
-
+                  <td className="p-3 text-center">{item.genericName}</td>
                   <td className="p-3">{item.category}</td>
 
                   <td className="p-3">{item.company}</td>
@@ -347,8 +351,6 @@ export default function Medicines() {
                   <td className="p-3">{item.batchNumber}</td>
 
                   <td className="p-3 text-center">{item.stockQuantity}</td>
-
-                  <td className="p-3 text-center">₹{item.purchasePrice}</td>
 
                   <td className="p-3 text-center font-semibold text-green-600">
                     ₹{item.sellingPrice}
@@ -390,6 +392,11 @@ export default function Medicines() {
             )}
           </tbody>
         </table>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );

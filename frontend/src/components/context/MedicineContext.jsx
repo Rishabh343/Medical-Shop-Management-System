@@ -6,7 +6,8 @@ export const MedicineContext = createContext();
 export default function MedicineProvider({ children }) {
   const [medicine, setMedicine] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   //Add medicine
   const addMedicine = async (formData) => {
     try {
@@ -56,11 +57,13 @@ export default function MedicineProvider({ children }) {
       console.log(error);
     }
   };
-  const getMedicine = async () => {
+  const getMedicine = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await api.get("/medicine/get-all");
-      setMedicine(response.data.data);
+      const response = await api.get(`/medicine/get-all?page=${page}&limit=10`);
+      setMedicine(response.data.medicines);
+      setCurrentPage(response.data.currentPage);
+      setTotalPages(response.data.totalPages);
     } catch (error) {
       console.log(error);
     } finally {
@@ -95,6 +98,8 @@ export default function MedicineProvider({ children }) {
         getMedicine,
         getByMedicineId,
         addMedicine,
+        currentPage,
+        totalPages,
         updateMedicine,
         deleteMedicine,
         searchMedicine,

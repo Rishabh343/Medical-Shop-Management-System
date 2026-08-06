@@ -6,7 +6,7 @@ export const CustomerContext = createContext();
 export default function CustomerProvider({ children }) {
   const [customer, setCustomer] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [purchaseHistory, setPurchaseHistory] = useState([]);
   //Add medicine
   const addCustomer = async (formData) => {
     try {
@@ -43,6 +43,18 @@ export default function CustomerProvider({ children }) {
       const response = await api.get(`/customer/${id}`);
       return response.data.customer;
       setCustomer(response.data.customer);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const getCustomerPurchaseHistory = async (id) => {
+    try {
+      setLoading(true);
+      const response = await api.get(`customer/history/${id}`);
+      setPurchaseHistory(response.data.bills);
+      return response.data;
     } catch (error) {
       console.log(error);
     } finally {
@@ -90,6 +102,8 @@ export default function CustomerProvider({ children }) {
         addCustomer,
         getCustomer,
         searchCustomer,
+        purchaseHistory,
+        getCustomerPurchaseHistory,
         getCustomerById,
         deleteCustomer,
         updateCustomer,

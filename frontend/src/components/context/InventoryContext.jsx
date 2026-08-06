@@ -6,15 +6,18 @@ export const InventoryContext = createContext();
 export default function InventoryProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [inventory, setInventory] = useState([]);
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   // \Get All Inventory
-  const getInventory = async () => {
+  const getInventory = async (page = 1) => {
     try {
       setLoading(true);
 
-      const response = await api.get("/inventory");
+      const response = await api.get(`/inventory?page=${page}&limit=10`);
 
-      setInventory(response.data.data);
+      setInventory(response.data.inventory);
+      setCurrentPage(response.data.currentPage);
+      setTotalPages(response.data.totalPages);
     } catch (error) {
       console.log(error);
     } finally {
@@ -149,6 +152,8 @@ export default function InventoryProvider({ children }) {
         getInventoryById,
         increaseStock,
         decreaseStock,
+        currentPage,
+        totalPages,
         getLowStock,
         getOutOfStock,
         searchInventory,

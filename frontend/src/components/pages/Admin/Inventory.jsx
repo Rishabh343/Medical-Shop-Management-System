@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { FaArrowUp, FaArrowDown, FaHistory } from "react-icons/fa";
 import { InventoryContext } from "../../context/InventoryContext";
 import { MedicineContext } from "../../context/MedicineContext";
+import Pagination from "../../common/Pagination";
 
 export default function Inventory() {
   const {
@@ -10,6 +11,8 @@ export default function Inventory() {
     getInventory,
     increaseStock,
     decreaseStock,
+    currentPage,
+    totalPages,
     getLowStock,
     searchInventory,
     getOutOfStock,
@@ -22,7 +25,9 @@ export default function Inventory() {
   useEffect(() => {
     fetchInventory();
   }, [filter]);
-
+  const handlePageChange = (page) => {
+    getInventory(page);
+  };
   const fetchInventory = () => {
     switch (filter) {
       case "low":
@@ -254,6 +259,11 @@ export default function Inventory() {
             )}
           </tbody>
         </table>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );
