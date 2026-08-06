@@ -30,7 +30,7 @@ export default function Customers() {
   // States for History Modal
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-
+  const role = localStorage.getItem("role");
   const [formData, setFormData] = useState({
     customerName: "",
     phoneNumber: "",
@@ -373,13 +373,14 @@ export default function Customers() {
                         <FaEdit size={18} />
                       </button>
 
-                      <button
-                        onClick={() => handleDelete(item._id)}
-                        className="text-red-500 hover:text-red-700 transition"
-                        title="Delete"
-                      >
-                        <FaTrash size={18} />
-                      </button>
+                      {role === "Admin" && (
+                        <button
+                          onClick={() => handleDelete(item._id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

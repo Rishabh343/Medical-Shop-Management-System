@@ -8,10 +8,6 @@ import {
   FaExclamationTriangle,
   FaRupeeSign,
 } from "react-icons/fa";
-
-
-
-
 import {
   ResponsiveContainer,
   LineChart,
@@ -143,10 +139,10 @@ export default function Dashboard() {
       </div>
       {/* Charts */}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Category Wise Sales */}
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6"> */}
+      {/* Category Wise Sales */}
 
-        <div className="bg-white rounded-xl shadow p-6">
+      {/* <div className="bg-white rounded-xl shadow p-6">
           <h2 className="text-xl font-semibold mb-5">Category-wise Sales</h2>
 
           <ResponsiveContainer width="100%" height={320}>
@@ -180,11 +176,11 @@ export default function Dashboard() {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </div> */}
 
-        {/* Top Selling Medicines */}
+      {/* Top Selling Medicines */}
 
-        <div className="bg-white rounded-xl shadow p-6">
+      {/* <div className="bg-white rounded-xl shadow p-6">
           <h2 className="text-xl font-semibold mb-5">Top Selling Medicines</h2>
 
           <ResponsiveContainer width="100%" height={320}>
@@ -201,7 +197,7 @@ export default function Dashboard() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </div> */}
 
       {/* Statistics */}
 

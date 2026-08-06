@@ -42,7 +42,7 @@ export default function Medicines() {
     // reorderLevel: "",
     supplier: "",
   });
-
+  const role = localStorage.getItem("role");
   useEffect(() => {
     getMedicine(1);
     getSupplier();
@@ -331,8 +331,7 @@ export default function Medicines() {
               <th className="p-3 text-center">Supplier</th>
 
               <th className="p-3 text-center">Expiry</th>
-
-              <th className="p-3 text-center">Actions</th>
+              {role === "Admin" && <th className="p-3 text-center">Actions</th>}
             </tr>
           </thead>
 
@@ -363,24 +362,25 @@ export default function Medicines() {
                   <td className="p-3 text-center">
                     {new Date(item.expiryDate).toLocaleDateString()}
                   </td>
+                  {role === "Admin" && (
+                    <td className="p-3">
+                      <div className="flex justify-center gap-3">
+                        <button
+                          onClick={() => handleEdit(item._id)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          <FaEdit />
+                        </button>
 
-                  <td className="p-3">
-                    <div className="flex justify-center gap-3">
-                      <button
-                        onClick={() => handleEdit(item._id)}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        <FaEdit />
-                      </button>
-
-                      <button
-                        onClick={() => handleDelete(item._id)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <FaTrash />
-                      </button>
-                    </div>
-                  </td>
+                        <button
+                          onClick={() => handleDelete(item._id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (
