@@ -85,7 +85,7 @@ export default function Login() {
               required
             />
           </div>
-          <div className="text-right">
+          {/* <div className="text-right">
             <button
               type="button"
               onClick={() => navigate("/forgot-password")}
@@ -93,7 +93,7 @@ export default function Login() {
             >
               Forgot Password?
             </button>
-          </div>
+          </div> */}
           <button
             type="submit"
             disabled={loading}

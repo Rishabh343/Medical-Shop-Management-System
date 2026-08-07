@@ -3,6 +3,7 @@ import { FaArrowUp, FaArrowDown, FaHistory } from "react-icons/fa";
 import { InventoryContext } from "../../context/InventoryContext";
 import { MedicineContext } from "../../context/MedicineContext";
 import Pagination from "../../common/Pagination";
+import Loader from "../../common/Loader";
 
 export default function Inventory() {
   const {
@@ -97,7 +98,7 @@ export default function Inventory() {
   };
 
   if (loading) {
-    return <h2 className="text-center text-lg">Loading...</h2>;
+    return <Loader/> 
   }
 
   return (
