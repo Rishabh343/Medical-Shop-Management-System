@@ -1,3 +1,4 @@
+import billingModel from "../models/billingModel.js";
 import medicineModel from "../models/medicineModel.js";
 
 export const getAllInventory = async (req, res) => {
@@ -24,6 +25,57 @@ export const getAllInventory = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getStockMovement = async (req, res) => {
+  try {
+    // 1. Fetch all billing records to generate "OUT" history (Sales)
+    const sales = await billingModel.find().sort({ createdAt: -1 });
+    let stockHistory = [];
+
+    // Extract individual items from all bills
+    sales.forEach((bill) => {
+      bill.items.forEach((item) => {
+        stockHistory.push({
+          _id: `${bill._id}-${item.medicine}`,
+          inventory: item.medicine,
+          type: "OUT",
+          quantity: item.quantity,
+          remarks: `Sold - Bill #${bill.billNumber}`,
+          createdAt: bill.createdAt,
+        });
+      });
+    });
+
+    // 2. Fetch all medicines to act as "IN" / stock updates
+    const medicines = await medicineModel.find();
+
+    medicines.forEach((med) => {
+      stockHistory.push({
+        _id: `${med._id}-init`,
+        inventory: med._id,
+        type: "IN",
+        // Fallback to current stock if no dedicated movement DB exists
+        quantity: med.stockQuantity,
+        remarks: "Stock Added / Adjusted",
+        createdAt: med.updatedAt || med.createdAt,
+      });
+    });
+
+    // 3. Sort the combined history from Newest to Oldest
+    stockHistory.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.status(200).json({
+      success: true,
+      count: stockHistory.length,
+      data: stockHistory,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
       message: error.message,
     });
   }

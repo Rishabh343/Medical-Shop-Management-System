@@ -8,6 +8,7 @@ export default function InventoryProvider({ children }) {
   const [inventory, setInventory] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [stockMovement, setStockMovement] = useState([]);
   // \Get All Inventory
   const getInventory = async (page = 1) => {
     try {
@@ -34,7 +35,21 @@ export default function InventoryProvider({ children }) {
       console.log(error);
     }
   };
+  const getStockMovement = async () => {
+    try {
+      setLoading(true);
 
+      const response = await api.get("/inventory/stock-movement");
+
+      setStockMovement(response.data.data);
+
+      return response.data.data;
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
   // Increase Stock
   const increaseStock = async (id, quantity) => {
     try {
@@ -149,6 +164,7 @@ export default function InventoryProvider({ children }) {
         loading,
         inventory,
         getInventory,
+        stockMovement,
         getInventoryById,
         increaseStock,
         decreaseStock,
@@ -159,6 +175,7 @@ export default function InventoryProvider({ children }) {
         searchInventory,
         getExpiredInventory,
         getNearExpiryInventory,
+        getStockMovement,
       }}
     >
       {children}

@@ -72,11 +72,26 @@ export default function UserProvider({ children }) {
   };
 
   // Logout
-  const logoutUser = () => {
-    localStorage.removeItem("role");
-    localStorage.removeItem("token");
-  };
+  // const logoutUser = () => {
+  //   localStorage.removeItem("role");
+  //   localStorage.removeItem("token");
+  // };
+  const logoutUser = async () => {
+    try {
+      setLoading(true);
 
+      const response = await api.post("/user/logout");
+
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("role");
+
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <UserContext.Provider
       value={{

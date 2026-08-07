@@ -121,3 +121,22 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Logout Successful",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

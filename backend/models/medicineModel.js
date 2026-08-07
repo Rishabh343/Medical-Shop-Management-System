@@ -95,6 +95,14 @@ const medicineSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    stockIn: {
+      type: Number,
+      default: 0,
+    },
+    stockOut: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
