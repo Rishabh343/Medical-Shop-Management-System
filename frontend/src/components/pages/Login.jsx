@@ -12,9 +12,6 @@ import {
 import toast from "react-hot-toast";
 import { UserContext } from "../context/UserContext";
 
-
-
-
 export default function Login() {
   const navigate = useNavigate();
 
