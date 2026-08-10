@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../context/userContext";
+
 import {
   Package,
   UserPlus,
@@ -10,6 +10,7 @@ import {
   LockKeyhole,
   ShieldCheck,
 } from "lucide-react";
+import { UserContext } from "../context/UserContext";
 
 export default function Signup() {
   const navigate = useNavigate();

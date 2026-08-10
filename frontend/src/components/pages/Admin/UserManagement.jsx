@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FaTrash, FaUsers } from "react-icons/fa";
-import { UserContext } from "../../context/userContext";
+import { UserContext } from "../../context/UserContext";
 import Loader from "../../common/Loader";
 
 export default function UserManagement() {
