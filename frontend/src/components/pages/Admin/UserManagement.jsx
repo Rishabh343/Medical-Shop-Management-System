@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FaTrash, FaUsers } from "react-icons/fa";
-import { UserContext } from "../../context/userContext";
+
 import Loader from "../../common/Loader";
+import { UserContext } from "../../context/UserContext";
 
 export default function UserManagement() {
   const { users, loading, getUsers, deleteUser } = useContext(UserContext);
