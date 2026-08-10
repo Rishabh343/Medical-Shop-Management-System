@@ -59,7 +59,7 @@ export default function UserProvider({ children }) {
       setLoading(false);
     }
   };
-const forgotPassword = async (email) => {
+  const forgotPassword = async (email) => {
     try {
       setLoading(true);
       // Ensure you have this endpoint in your backend!

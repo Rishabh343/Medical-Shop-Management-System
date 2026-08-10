@@ -9,7 +9,8 @@ import InventoryProvider from "./components/context/InventoryContext.jsx";
 import BillingProvider from "./components/context/BillingContext.jsx";
 import DashboardProvider from "./components/context/DashboardContext.jsx";
 import ReportProvider from "./components/context/ReportContext.jsx";
-import UserProvider from "./components/context/UserContext.jsx";
+import UserProvider from "./components/context/userContext.jsx";
+
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -30,5 +31,5 @@ createRoot(document.getElementById("root")).render(
         </DashboardProvider>
       </ReportProvider>
     </UserProvider>
-  </StrictMode>
+  </StrictMode>,
 );
