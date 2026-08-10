@@ -2,7 +2,6 @@ import { createContext, useState } from "react";
 import api from "../../services/api";
 
 export const UserContext = createContext();
-
 export default function UserProvider({ children }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -11,11 +10,8 @@ export default function UserProvider({ children }) {
   const registerUser = async (formData) => {
     try {
       setLoading(true);
-
       const response = await api.post("/user/register", formData);
-
       setUsers((prev) => [response.data.data, ...prev]);
-
       return response.data;
     } catch (error) {
       console.log(error);
