@@ -10,8 +10,7 @@ import {
 } from "lucide-react";
 
 import toast from "react-hot-toast";
-import { UserContext } from "../context/UserContext";
-
+import { UserContext } from "../context/userContext";
 
 
 export default function Login() {

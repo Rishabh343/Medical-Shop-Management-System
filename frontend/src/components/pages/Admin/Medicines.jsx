@@ -164,381 +164,368 @@ export default function Medicines() {
   if (loading && medicine.length === 0) {
     return <Loader />;
   }
- return (
-  <div className="space-y-6">
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
+            Inventory
+          </p>
 
-    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-      <div>
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
-          Inventory
-        </p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
+            Medicines
+          </h1>
 
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
-          Medicines
-        </h1>
-
-        <p className="mt-1 text-sm text-stone-500">
-          Manage pharmacy medicines and stock.
-        </p>
-      </div>
-
-      {role === "Admin" && (
-        <button
-          onClick={openAddModal}
-          className="flex items-center justify-center gap-2 rounded-xl bg-stone-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-stone-800 hover:shadow-md"
-        >
-          <FaPlus size={13} />
-          Add Medicine
-        </button>
-      )}
-    </div>
-
-    <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-4 shadow-sm">
-      <div className="relative">
-        <FaSearch
-          size={14}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"
-        />
-
-        <input
-          type="text"
-          placeholder="Search by medicine name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border border-stone-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
-        />
-      </div>
-    </div>
-
-    <Modal
-      isOpen={openModal}
-      onClose={closeModal}
-      title={editing ? "Update Medicine" : "Add Medicine"}
-    >
-      <form
-        onSubmit={handleSubmit}
-        className="max-h-[70vh] space-y-5 overflow-y-auto px-1"
-      >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-stone-700">
-              Medicine Name
-            </label>
-            <input
-              type="text"
-              name="medicineName"
-              value={formData.medicineName}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-stone-700">
-              Generic Name
-            </label>
-            <input
-              type="text"
-              name="genericName"
-              value={formData.genericName}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-stone-700">
-              Category
-            </label>
-            <input
-              type="text"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-stone-700">
-              Company
-            </label>
-            <input
-              type="text"
-              name="company"
-              value={formData.company}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-stone-700">
-              Batch Number
-            </label>
-            <input
-              type="text"
-              name="batchNumber"
-              value={formData.batchNumber}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-stone-700">
-              Expiry Date
-            </label>
-            <input
-              type="date"
-              name="expiryDate"
-              value={formData.expiryDate}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-stone-700">
-              Purchase Price (₹)
-            </label>
-            <input
-              type="number"
-              name="purchasePrice"
-              value={formData.purchasePrice}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-stone-700">
-              Selling Price (₹)
-            </label>
-            <input
-              type="number"
-              name="sellingPrice"
-              value={formData.sellingPrice}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-stone-700">
-              Stock Quantity
-            </label>
-            <input
-              type="number"
-              name="stockQuantity"
-              value={formData.stockQuantity}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-stone-700">
-              Supplier
-            </label>
-            <select
-              name="supplier"
-              value={formData.supplier}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
-              required
-            >
-              <option value="">Select Supplier</option>
-              {supplier.map((s) => (
-                <option key={s._id} value={s._id}>
-                  {s.supplierName}
-                </option>
-              ))}
-            </select>
-          </div>
-
+          <p className="mt-1 text-sm text-stone-500">
+            Manage pharmacy medicines and stock.
+          </p>
         </div>
 
-        <button
-          type="submit"
-          className="mt-2 w-full rounded-xl bg-stone-900 py-3 text-sm font-medium text-white transition hover:bg-stone-800 hover:shadow-md"
-        >
-          {editing ? "Update Medicine" : "Save Medicine"}
-        </button>
-      </form>
-    </Modal>
-
-    <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-[#faf9f6] shadow-sm">
-
-      {loading && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#faf9f6]/70 backdrop-blur-[1px]">
-          <div className="h-7 w-7 animate-spin rounded-full border-2 border-stone-200 border-t-stone-900" />
-        </div>
-      )}
-
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] text-left">
-
-          <thead className="border-b border-stone-200 bg-stone-50/70">
-            <tr>
-              <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-stone-500">
-                Medicine
-              </th>
-
-              <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-stone-500">
-                Company
-              </th>
-
-              <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-stone-500">
-                Supplier
-              </th>
-
-              <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
-                Stock
-              </th>
-
-              <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
-                Price
-              </th>
-
-              <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
-                Expiry
-              </th>
-
-              {role === "Admin" && (
-                <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
-                  Actions
-                </th>
-              )}
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-stone-100">
-
-            {medicine.length > 0 ? (
-              medicine.map((item) => (
-                <tr
-                  key={item._id}
-                  className="transition hover:bg-stone-50/80"
-                >
-                  <td className="px-5 py-4">
-                    <div>
-                      <p className="text-sm font-semibold text-stone-900">
-                        {item.medicineName}
-                      </p>
-
-                      {item.genericName && (
-                        <p className="mt-1 text-xs text-stone-400">
-                          {item.genericName}
-                        </p>
-                      )}
-                    </div>
-                  </td>
-
-                  <td className="px-5 py-4 text-sm text-stone-600">
-                    {item.company}
-                  </td>
-
-                  <td className="px-5 py-4 text-sm text-stone-600">
-                    {item.supplier?.supplierName || "N/A"}
-                  </td>
-
-                  <td className="px-5 py-4 text-center">
-                    <span
-                      className={`inline-flex min-w-10 justify-center rounded-full px-3 py-1.5 text-xs font-semibold ${
-                        item.stockQuantity <= 10
-                          ? "bg-stone-900 text-white"
-                          : "bg-stone-100 text-stone-700"
-                      }`}
-                    >
-                      {item.stockQuantity}
-                    </span>
-                  </td>
-
-                  <td className="px-5 py-4 text-center text-sm font-medium text-stone-900">
-                    ₹
-                    {Number(item.sellingPrice).toLocaleString(
-                      "en-IN",
-                    )}
-                  </td>
-
-                  <td className="px-5 py-4 text-center text-sm text-stone-500">
-                    {item.expiryDate
-                      ? new Date(
-                          item.expiryDate,
-                        ).toLocaleDateString()
-                      : "-"}
-                  </td>
-
-                  {role === "Admin" && (
-                    <td className="px-5 py-4">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => handleEdit(item._id)}
-                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:bg-stone-100 hover:text-stone-900"
-                        >
-                          <FaEdit size={13} />
-                        </button>
-
-                        <button
-                          onClick={() => handleDelete(item._id)}
-                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:bg-stone-100 hover:text-red-600"
-                        >
-                          <FaTrash size={13} />
-                        </button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={role === "Admin" ? 7 : 6}
-                  className="px-5 py-12 text-center"
-                >
-                  <div className="flex flex-col items-center justify-center">
-                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-stone-400">
-                      <FaPills size={15} />
-                    </div>
-
-                    <p className="text-sm font-medium text-stone-700">
-                      No Medicines Found
-                    </p>
-
-                    <p className="mt-1 text-xs text-stone-400">
-                      Try changing your search or add a new medicine.
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            )}
-
-          </tbody>
-        </table>
+        {role === "Admin" && (
+          <button
+            onClick={openAddModal}
+            className="flex items-center justify-center gap-2 rounded-xl bg-stone-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-stone-800 hover:shadow-md"
+          >
+            <FaPlus size={13} />
+            Add Medicine
+          </button>
+        )}
       </div>
 
-      {!isSearching && totalPages > 1 && (
-        <div className="border-t border-stone-200 px-5 py-4">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
+      <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-4 shadow-sm">
+        <div className="relative">
+          <FaSearch
+            size={14}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"
+          />
+
+          <input
+            type="text"
+            placeholder="Search by medicine name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border border-stone-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
           />
         </div>
-      )}
+      </div>
 
+      <Modal
+        isOpen={openModal}
+        onClose={closeModal}
+        title={editing ? "Update Medicine" : "Add Medicine"}
+      >
+        <form
+          onSubmit={handleSubmit}
+          className="max-h-[70vh] space-y-5 overflow-y-auto px-1"
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                Medicine Name
+              </label>
+              <input
+                type="text"
+                name="medicineName"
+                value={formData.medicineName}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                Generic Name
+              </label>
+              <input
+                type="text"
+                name="genericName"
+                value={formData.genericName}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                Category
+              </label>
+              <input
+                type="text"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                Company
+              </label>
+              <input
+                type="text"
+                name="company"
+                value={formData.company}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                Batch Number
+              </label>
+              <input
+                type="text"
+                name="batchNumber"
+                value={formData.batchNumber}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                Expiry Date
+              </label>
+              <input
+                type="date"
+                name="expiryDate"
+                value={formData.expiryDate}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                Purchase Price (₹)
+              </label>
+              <input
+                type="number"
+                name="purchasePrice"
+                value={formData.purchasePrice}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                Selling Price (₹)
+              </label>
+              <input
+                type="number"
+                name="sellingPrice"
+                value={formData.sellingPrice}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                Stock Quantity
+              </label>
+              <input
+                type="number"
+                name="stockQuantity"
+                value={formData.stockQuantity}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                Supplier
+              </label>
+              <select
+                name="supplier"
+                value={formData.supplier}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                required
+              >
+                <option value="">Select Supplier</option>
+                {supplier.map((s) => (
+                  <option key={s._id} value={s._id}>
+                    {s.supplierName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="mt-2 w-full rounded-xl bg-stone-900 py-3 text-sm font-medium text-white transition hover:bg-stone-800 hover:shadow-md"
+          >
+            {editing ? "Update Medicine" : "Save Medicine"}
+          </button>
+        </form>
+      </Modal>
+
+      <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-[#faf9f6] shadow-sm">
+        {loading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#faf9f6]/70 backdrop-blur-[1px]">
+            <div className="h-7 w-7 animate-spin rounded-full border-2 border-stone-200 border-t-stone-900" />
+          </div>
+        )}
+
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[900px] text-left">
+            <thead className="border-b border-stone-200 bg-stone-50/70">
+              <tr>
+                <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                  Medicine
+                </th>
+
+                <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                  Company
+                </th>
+
+                <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                  Supplier
+                </th>
+
+                <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                  Stock
+                </th>
+
+                <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                  Price
+                </th>
+
+                <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                  Expiry
+                </th>
+
+                {role === "Admin" && (
+                  <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                    Actions
+                  </th>
+                )}
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-stone-100">
+              {medicine.length > 0 ? (
+                medicine.map((item) => (
+                  <tr
+                    key={item._id}
+                    className="transition hover:bg-stone-50/80"
+                  >
+                    <td className="px-5 py-4">
+                      <div>
+                        <p className="text-sm font-semibold text-stone-900">
+                          {item.medicineName}
+                        </p>
+
+                        {item.genericName && (
+                          <p className="mt-1 text-xs text-stone-400">
+                            {item.genericName}
+                          </p>
+                        )}
+                      </div>
+                    </td>
+
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {item.company}
+                    </td>
+
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {item.supplier?.supplierName || "N/A"}
+                    </td>
+
+                    <td className="px-5 py-4 text-center">
+                      <span
+                        className={`inline-flex min-w-10 justify-center rounded-full px-3 py-1.5 text-xs font-semibold ${
+                          item.stockQuantity <= 10
+                            ? "bg-stone-900 text-white"
+                            : "bg-stone-100 text-stone-700"
+                        }`}
+                      >
+                        {item.stockQuantity}
+                      </span>
+                    </td>
+
+                    <td className="px-5 py-4 text-center text-sm font-medium text-stone-900">
+                      ₹{Number(item.sellingPrice).toLocaleString("en-IN")}
+                    </td>
+
+                    <td className="px-5 py-4 text-center text-sm text-stone-500">
+                      {item.expiryDate
+                        ? new Date(item.expiryDate).toLocaleDateString()
+                        : "-"}
+                    </td>
+
+                    {role === "Admin" && (
+                      <td className="px-5 py-4">
+                        <div className="flex justify-center gap-2">
+                          <button
+                            onClick={() => handleEdit(item._id)}
+                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:bg-stone-100 hover:text-stone-900"
+                          >
+                            <FaEdit size={13} />
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(item._id)}
+                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:bg-stone-100 hover:text-red-600"
+                          >
+                            <FaTrash size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={role === "Admin" ? 7 : 6}
+                    className="px-5 py-12 text-center"
+                  >
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-stone-400">
+                        <FaPills size={15} />
+                      </div>
+
+                      <p className="text-sm font-medium text-stone-700">
+                        No Medicines Found
+                      </p>
+
+                      <p className="mt-1 text-xs text-stone-400">
+                        Try changing your search or add a new medicine.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {!isSearching && totalPages > 1 && (
+          <div className="border-t border-stone-200 px-5 py-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 }

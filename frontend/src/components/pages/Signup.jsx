@@ -10,7 +10,8 @@ import {
   LockKeyhole,
   ShieldCheck,
 } from "lucide-react";
-import { UserContext } from "../context/UserContext";
+import { UserContext } from "../context/userContext";
+
 
 export default function Signup() {
   const navigate = useNavigate();
