@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FaPlus, FaSearch, FaEdit, FaTrash, FaPills } from "react-icons/fa";
-import { SupplierContext } from "../../context/SupplierConrtext";
+import { SupplierContext } from "../../context/SupplierContext";
 import Modal from "../../common/Modal";
 import Loader from "../../common/Loader";
 

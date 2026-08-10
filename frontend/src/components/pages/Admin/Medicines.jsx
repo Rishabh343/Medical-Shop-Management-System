@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import Modal from "../../common/Modal";
 import Loader from "../../common/Loader";
 import { MedicineContext } from "../../context/MedicineContext";
-import { SupplierContext } from "../../context/SupplierConrtext";
+import { SupplierContext } from "../../context/SupplierContext";
 import Pagination from "../../common/Pagination";
 import { FaPlus, FaSearch, FaEdit, FaTrash, FaPills } from "react-icons/fa";
 export default function Medicines() {
