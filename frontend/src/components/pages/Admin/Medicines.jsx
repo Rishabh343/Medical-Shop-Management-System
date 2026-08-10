@@ -17,14 +17,17 @@ export default function Medicines() {
     updateMedicine,
     deleteMedicine,
     searchMedicine,
+    filterMedicine,
   } = useContext(MedicineContext);
 
   const { supplier, getSupplier } = useContext(SupplierContext);
-
+  const [category, setCategory] = useState("");
+  const [company, setCompany] = useState("");
+  const [selectedSupplier, setSelectedSupplier] = useState("");
   // Search States
   const [search, setSearch] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-
+  const [isFiltering, setIsFiltering] = useState(false);
   // Modal States
   const [openModal, setOpenModal] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -46,6 +49,7 @@ export default function Medicines() {
   const role = localStorage.getItem("role");
   useEffect(() => {
     getMedicine(1);
+     getSupplier();
   }, []);
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -80,6 +84,25 @@ export default function Medicines() {
     });
     setEditing(false);
     setSelectedId(null);
+  };
+  const handleFilter = async (
+    newCategory = category,
+    newCompany = company,
+    newSupplier = selectedSupplier,
+  ) => {
+    try {
+      setIsFiltering(true);
+      await filterMedicine(newCategory, newCompany, newSupplier);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const clearFilters = () => {
+    setCategory("");
+    setCompany("");
+    setSelectedSupplier("");
+    setIsFiltering(false);
+    getMedicine(1);
   };
   const openAddModal = async () => {
     resetForm();
@@ -193,20 +216,85 @@ export default function Medicines() {
       </div>
 
       <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-4 shadow-sm">
-        <div className="relative">
-          <FaSearch
-            size={14}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"
-          />
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <div className="relative">
+            <FaSearch
+              size={14}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"
+            />
+            <input
+              type="text"
+              placeholder="Search medicine..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-xl border border-stone-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+            />
+          </div>
 
-          <input
-            type="text"
-            placeholder="Search by medicine name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-stone-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
-          />
+          <select
+            value={category}
+            onChange={(e) => {
+              setCategory(e.target.value);
+              handleFilter(e.target.value, company, selectedSupplier);
+            }}
+            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm text-stone-700 outline-none focus:border-stone-900"
+          >
+            <option value="">All Categories</option>
+            {[
+              ...new Set(medicine.map((item) => item.category).filter(Boolean)),
+            ].map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={company}
+            onChange={(e) => {
+              setCompany(e.target.value);
+              handleFilter(category, e.target.value, selectedSupplier);
+            }}
+            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm text-stone-700 outline-none focus:border-stone-900"
+          >
+            <option value="">All Companies</option>
+            {[
+              ...new Set(medicine.map((item) => item.company).filter(Boolean)),
+            ].map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedSupplier}
+            onChange={(e) => {
+              setSelectedSupplier(e.target.value);
+              handleFilter(category, company, e.target.value);
+            }}
+            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm text-stone-700 outline-none focus:border-stone-900"
+          >
+            <option value="">All Suppliers</option>
+            {supplier.map((item) => (
+              <option key={item._id} value={item._id}>
+                {item.supplierName}
+              </option>
+            ))}
+          </select>
         </div>
+
+        {(category || company || selectedSupplier) && (
+          <div className="mt-3 flex justify-end">
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="rounded-lg px-3 py-2 text-xs font-medium text-stone-500 transition hover:bg-stone-100 hover:text-stone-900"
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
       </div>
 
       <Modal

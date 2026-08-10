@@ -48,15 +48,16 @@ export default function MedicineProvider({ children }) {
       console.log(error);
     }
   };
-  const filterMedicine = async (category) => {
-    try {
-      const response = await api.get(`/medicine/filter?category=${category}`);
-
-      setMedicine(response.data.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+const filterMedicine = async (category = "", company = "", supplier = "") => {
+  try {
+    const response = await api.get(
+      `/medicine/filter?category=${category}&company=${company}&supplier=${supplier}`
+    );
+    setMedicine(response.data.data);
+  } catch (error) {
+    console.log(error);
+  }
+};
   const getMedicine = async (page = 1) => {
     try {
       setLoading(true);
