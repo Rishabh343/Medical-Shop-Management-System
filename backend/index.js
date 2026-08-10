@@ -22,7 +22,7 @@ const port = process.env.PORT || 3000;
 connectDB();
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://medical-shop-management-system-phi.vercel.app",
+  "https://medical-shop-management-system-gamma.vercel.app",
 ];
 const corsOptions = {
   origin: function (origin, callback) {
