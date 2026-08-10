@@ -41,7 +41,19 @@ export default function Customers() {
   useEffect(() => {
     getCustomer();
   }, []);
+  useEffect(() => {
+    // Set a timer to wait 500ms after the user stops typing
+    const delayDebounceFn = setTimeout(() => {
+      if (search.trim() === "") {
+        getCustomer();
+      } else {
+        searchCustomer(search);
+      }
+    }, 500);
 
+    // Cleanup: If the user types again before 500ms, destroy the old timer
+    return () => clearTimeout(delayDebounceFn);
+  }, [search]); // This runs every time 'search' changes
   const resetForm = () => {
     setFormData({
       customerName: "",
@@ -168,236 +180,399 @@ export default function Customers() {
     return <Loader />;
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">
-            Customer Management
-          </h1>
-          <p className="text-gray-500">Manage all pharmacy customers.</p>
-        </div>
+return (
+  <div className="space-y-6">
 
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-          <FaPlus />
-          Add Customer
-        </button>
+    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      <div>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
+          Customers
+        </p>
+
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
+          Customer Management
+        </h1>
+
+        <p className="mt-1 text-sm text-stone-500">
+          Manage pharmacy customers and purchase records.
+        </p>
       </div>
 
-      {/* --- ADD / EDIT CUSTOMER MODAL --- */}
-      <Modal
-        isOpen={openModal}
-        onClose={closeModal}
-        title={editing ? "Update Customer" : "Add Customer"}
+      <button
+        onClick={openAddModal}
+        className="flex items-center justify-center gap-2 rounded-xl bg-stone-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-stone-800 hover:shadow-md"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <FaPlus size={13} />
+        Add Customer
+      </button>
+    </div>
+
+    <Modal
+      isOpen={openModal}
+      onClose={closeModal}
+      title={editing ? "Update Customer" : "Add Customer"}
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-stone-700">
+            Customer Name
+          </label>
+
           <input
             type="text"
             name="customerName"
             value={formData.customerName}
             onChange={handleChange}
-            placeholder="Customer Name"
-            className="w-full border rounded-lg p-3 outline-none focus:border-blue-500"
+            placeholder="Enter customer name"
+            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
             required
           />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-stone-700">
+            Phone Number
+          </label>
+
           <input
             type="text"
             name="phoneNumber"
             value={formData.phoneNumber}
             onChange={handleChange}
-            placeholder="Phone Number"
-            className="w-full border rounded-lg p-3 outline-none focus:border-blue-500"
+            placeholder="Enter phone number"
+            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
             required
           />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-stone-700">
+            Email
+          </label>
+
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Email"
-            className="w-full border rounded-lg p-3 outline-none focus:border-blue-500"
+            placeholder="customer@example.com"
+            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
           />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-stone-700">
+            Address
+          </label>
+
           <textarea
             name="address"
             value={formData.address}
             onChange={handleChange}
-            placeholder="Address"
+            placeholder="Enter customer address"
             rows={3}
-            className="w-full border rounded-lg p-3 resize-none outline-none focus:border-blue-500"
+            className="w-full resize-none rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
           />
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition"
-          >
-            {editing ? "Update Customer" : "Save Customer"}
-          </button>
-        </form>
-      </Modal>
-
-      {/* --- VIEW HISTORY MODAL --- */}
-      <Modal
-        isOpen={historyModalOpen}
-        onClose={() => setHistoryModalOpen(false)}
-        title={`History: ${selectedCustomer?.customerName || "Customer"}`}
-      >
-        <div className="space-y-4">
-          {purchaseHistory && purchaseHistory.length > 0 ? (
-            <div className="max-h-64 overflow-y-auto border rounded-lg shadow-inner">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-gray-100 sticky top-0">
-                  <tr>
-                    <th className="p-3 border-b">Date</th>
-                    <th className="p-3 border-b">Bill #</th>
-                    <th className="p-3 border-b text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {purchaseHistory.map((bill) => (
-                    <tr key={bill._id} className="border-b hover:bg-gray-50">
-                      <td className="p-3">
-                        {new Date(bill.createdAt).toLocaleDateString("en-IN")}
-                      </td>
-                      <td className="p-3 text-gray-600">{bill.billNumber}</td>
-                      <td className="p-3 font-semibold text-right">
-                        ₹{bill.finalAmount?.toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="py-8 text-center text-gray-500">
-              No purchase history found for this customer.
-            </div>
-          )}
-
-          <button
-            onClick={downloadHistoryReport}
-            disabled={!purchaseHistory || purchaseHistory.length === 0}
-            className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <FaFileDownload />
-            Download PDF Report
-          </button>
         </div>
-      </Modal>
 
-      {/* --- SEARCH BAR --- */}
-      <div className="bg-white rounded-xl shadow p-4">
-        <input
-          type="text"
-          placeholder="Search by name or phone..."
-          value={search}
-          onChange={(e) => {
-            const value = e.target.value;
-            setSearch(value);
-            if (value.trim() === "") {
-              getCustomer();
-            } else {
-              searchCustomer(value);
-            }
-          }}
-          className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-        />
+        <button
+          type="submit"
+          className="w-full rounded-xl bg-stone-900 py-3 text-sm font-medium text-white transition hover:bg-stone-800 hover:shadow-md"
+        >
+          {editing ? "Update Customer" : "Save Customer"}
+        </button>
+
+      </form>
+    </Modal>
+
+    <Modal
+      isOpen={historyModalOpen}
+      onClose={() => setHistoryModalOpen(false)}
+      title={`Purchase History: ${
+        selectedCustomer?.customerName || "Customer"
+      }`}
+    >
+      <div className="space-y-5">
+
+        {purchaseHistory && purchaseHistory.length > 0 ? (
+          <div className="max-h-72 overflow-y-auto rounded-xl border border-stone-200">
+
+            <table className="w-full text-left text-sm">
+
+              <thead className="sticky top-0 border-b border-stone-200 bg-stone-50">
+                <tr>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                    Date
+                  </th>
+
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                    Bill #
+                  </th>
+
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-stone-500">
+                    Amount
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-stone-100">
+
+                {purchaseHistory.map((bill) => (
+                  <tr
+                    key={bill._id}
+                    className="transition hover:bg-stone-50"
+                  >
+                    <td className="px-4 py-3 text-sm text-stone-600">
+                      {new Date(
+                        bill.createdAt,
+                      ).toLocaleDateString("en-IN")}
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-stone-600">
+                      {bill.billNumber}
+                    </td>
+
+                    <td className="px-4 py-3 text-right text-sm font-semibold text-stone-900">
+                      ₹{bill.finalAmount?.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="rounded-xl bg-stone-50 py-10 text-center">
+            <p className="text-sm font-medium text-stone-700">
+              No purchase history found
+            </p>
+
+            <p className="mt-1 text-xs text-stone-400">
+              This customer has no recorded purchases.
+            </p>
+          </div>
+        )}
+
+        <button
+          onClick={downloadHistoryReport}
+          disabled={
+            !purchaseHistory ||
+            purchaseHistory.length === 0
+          }
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-stone-900 py-3 text-sm font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-300"
+        >
+          <FaFileDownload size={13} />
+          Download PDF Report
+        </button>
+
       </div>
+    </Modal>
 
-      {/* --- CUSTOMERS TABLE --- */}
-      <div className="bg-white rounded-xl shadow overflow-x-auto">
-        <table className="min-w-full">
-          <thead className="bg-gray-100 border-b">
+    <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-4 shadow-sm">
+
+      <input
+        type="text"
+        placeholder="Search by name or phone..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+      />
+
+    </div>
+
+    <div className="overflow-hidden rounded-2xl border border-stone-200 bg-[#faf9f6] shadow-sm">
+
+      <div className="overflow-x-auto">
+
+        <table className="w-full min-w-[1050px]">
+
+          <thead className="border-b border-stone-200 bg-stone-50/70">
+
             <tr>
-              <th className="p-4 text-left font-semibold text-gray-700">#</th>
-              <th className="p-4 text-left font-semibold text-gray-700">
-                Customer Name
+
+              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">
+                #
               </th>
-              <th className="p-4 text-left font-semibold text-gray-700">
+
+              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Customer
+              </th>
+
+              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">
                 Phone
               </th>
-              <th className="p-4 text-left font-semibold text-gray-700">
+
+              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">
                 Email
               </th>
-              <th className="p-4 text-left font-semibold text-gray-700">
+
+              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">
                 Address
               </th>
-              <th className="p-4 text-left font-semibold text-gray-700">
-                Reward Points
+
+              <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Rewards
               </th>
-              <th className="p-4 text-center font-semibold text-gray-700">
+
+              <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
                 History
               </th>
-              <th className="p-4 text-center font-semibold text-gray-700">
+
+              <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
                 Actions
               </th>
+
             </tr>
+
           </thead>
 
-          <tbody>
+          <tbody className="divide-y divide-stone-100">
+
             {customer.length > 0 ? (
               customer.map((item, index) => (
+
                 <tr
                   key={item._id}
-                  className="border-b hover:bg-gray-50 transition"
+                  className="transition hover:bg-stone-50/80"
                 >
-                  <td className="p-4 text-gray-500">{index + 1}</td>
-                  <td className="p-4 font-medium text-gray-800">
-                    {item.customerName}
+
+                  <td className="px-5 py-4 text-sm text-stone-400">
+                    {index + 1}
                   </td>
-                  <td className="p-4 text-gray-600">{item.phoneNumber}</td>
-                  <td className="p-4 text-gray-600">{item.email || "-"}</td>
-                  <td className="p-4 text-gray-600">{item.address || "-"}</td>
-                  <td className="p-4 text-gray-600">
-                    {item.rewardPoints || "0"}
+
+                  <td className="px-5 py-4">
+                    <p className="text-sm font-semibold text-stone-900">
+                      {item.customerName}
+                    </p>
                   </td>
-                  {/* History Button Column */}
-                  <td className="p-4 text-center">
+
+                  <td className="px-5 py-4 text-sm text-stone-600">
+                    {item.phoneNumber}
+                  </td>
+
+                  <td className="px-5 py-4 text-sm text-stone-600">
+                    {item.email || "-"}
+                  </td>
+
+                  <td className="max-w-[220px] px-5 py-4 text-sm text-stone-600">
+                    <span className="line-clamp-2">
+                      {item.address || "-"}
+                    </span>
+                  </td>
+
+                  <td className="px-5 py-4 text-center">
+                    <span className="inline-flex min-w-10 justify-center rounded-full bg-stone-100 px-3 py-1.5 text-xs font-semibold text-stone-700">
+                      {item.rewardPoints || "0"}
+                    </span>
+                  </td>
+
+                  <td className="px-5 py-4 text-center">
+
                     <button
-                      onClick={() => handleViewHistory(item)}
-                      className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 font-medium text-sm bg-blue-50 px-3 py-1.5 rounded-full transition"
+                      onClick={() =>
+                        handleViewHistory(item)
+                      }
+                      className="inline-flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-600 shadow-sm transition hover:bg-stone-50 hover:text-stone-900"
                     >
-                      <FaEye /> View
+                      <FaEye size={12} />
+                      View
                     </button>
+
                   </td>
 
-                  {/* Actions Column */}
-                  <td className="p-4">
-                    <div className="flex justify-center gap-4">
-                      <button
-                        onClick={() => handleEdit(item._id)}
-                        className="text-indigo-500 hover:text-indigo-700 transition"
-                        title="Edit"
-                      >
-                        <FaEdit size={18} />
-                      </button>
+                  <td className="px-5 py-4 text-center">
 
-                      {role === "Admin" && (
-                        <button
-                          onClick={() => handleDelete(item._id)}
-                          className="text-red-600 hover:text-red-700"
+                    <details className="group relative inline-block">
+
+                      <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-600 shadow-sm transition hover:bg-stone-50">
+
+                        Actions
+
+                        <svg
+                          className="h-3.5 w-3.5 text-stone-400 transition group-open:rotate-180"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <FaTrash />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+
+                      </summary>
+
+                      <div className="absolute right-0 z-30 mt-2 w-36 overflow-hidden rounded-xl border border-stone-200 bg-white p-1 text-left shadow-xl">
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleEdit(item._id)
+                          }
+                          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-stone-700 transition hover:bg-stone-50"
+                        >
+                          <FaEdit size={12} />
+                          Edit
                         </button>
-                      )}
-                    </div>
+
+                        {role === "Admin" && (
+                          <>
+                            <div className="my-1 border-t border-stone-100" />
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleDelete(item._id)
+                              }
+                              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition hover:bg-red-50"
+                            >
+                              <FaTrash size={12} />
+                              Delete
+                            </button>
+                          </>
+                        )}
+
+                      </div>
+
+                    </details>
+
                   </td>
+
                 </tr>
+
               ))
             ) : (
+
               <tr>
+
                 <td
-                  colSpan="7"
-                  className="text-center py-12 text-gray-500 font-medium"
+                  colSpan="8"
+                  className="px-5 py-14 text-center"
                 >
-                  No Customers Found
+                  <p className="text-sm font-medium text-stone-700">
+                    No Customers Found
+                  </p>
+
+                  <p className="mt-1 text-xs text-stone-400">
+                    Add a customer to start managing purchase records.
+                  </p>
                 </td>
+
               </tr>
+
             )}
+
           </tbody>
+
         </table>
+
       </div>
+
     </div>
-  );
+
+  </div>
+);
 }

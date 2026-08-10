@@ -1,28 +1,40 @@
-import React, { useContext } from "react";
+import React from "react";
 
-export default function Modal({ isOpen, onClose, title, children }) {
+export default function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+}) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-center items-center px-4">
-      <div
-        className={`w-full max-w-md rounded-lg shadow-lg p-5 bg-white text-black
-        }`}
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">{title}</h2>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 py-6 backdrop-blur-sm">
+
+      <div className="max-h-[90vh] w-full max-w-md overflow-hidden rounded-2xl border border-stone-200 bg-[#faf9f6] shadow-2xl">
+
+        <div className="flex items-center justify-between border-b border-stone-200 px-5 py-4">
+
+          <h2 className="text-lg font-semibold text-stone-900">
+            {title}
+          </h2>
 
           <button
+            type="button"
             onClick={onClose}
-            className={`text-xl px-2 rounded "text-black hover:bg-gray-100"
-               `}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-xl text-stone-400 transition hover:bg-stone-100 hover:text-stone-900"
           >
             ×
           </button>
+
         </div>
 
-        {children}
+        <div className="max-h-[calc(90vh-73px)] overflow-y-auto p-5">
+          {children}
+        </div>
+
       </div>
+
     </div>
   );
 }

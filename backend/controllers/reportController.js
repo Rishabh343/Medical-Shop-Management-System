@@ -5,10 +5,8 @@ export const getTodaySalesReport = async (req, res) => {
   try {
     const start = new Date();
     start.setHours(0, 0, 0, 0);
-
     const end = new Date();
     end.setHours(23, 59, 59, 999);
-
     const bills = await billingModel
       .find({
         createdAt: {
@@ -18,9 +16,7 @@ export const getTodaySalesReport = async (req, res) => {
       })
       .populate("customer", "customerName phoneNumber")
       .sort({ createdAt: -1 });
-
     const totalSales = bills.reduce((sum, bill) => sum + bill.totalAmount, 0);
-
     res.status(200).json({
       success: true,
       totalBills: bills.length,
@@ -37,11 +33,8 @@ export const getTodaySalesReport = async (req, res) => {
 export const getWeeklySalesReport = async (req, res) => {
   try {
     const today = new Date();
-
     const lastWeek = new Date();
-
     lastWeek.setDate(today.getDate() - 7);
-
     const bills = await billingModel
       .find({
         createdAt: {
@@ -51,9 +44,7 @@ export const getWeeklySalesReport = async (req, res) => {
       })
       .populate("customer", "customerName phoneNumber")
       .sort({ createdAt: -1 });
-
     const totalSales = bills.reduce((sum, bill) => sum + bill.totalAmount, 0);
-
     res.status(200).json({
       success: true,
       totalBills: bills.length,
@@ -70,7 +61,6 @@ export const getWeeklySalesReport = async (req, res) => {
 export const getMonthlySalesReport = async (req, res) => {
   try {
     const start = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-
     const end = new Date(
       new Date().getFullYear(),
       new Date().getMonth() + 1,
@@ -121,33 +111,21 @@ export const getProfitReport = async (req, res) => {
     bills.forEach((bill) => {
       bill.items.forEach((item) => {
         const medicine = item.medicine;
-
         if (!medicine) return;
-
         const purchase = medicine.purchasePrice * item.quantity;
-
         const selling = item.sellingPrice * item.quantity;
-
         const profit = selling - purchase;
-
         totalSales += selling;
         totalPurchase += purchase;
 
         report.push({
           billNumber: bill.billNumber,
-
           medicine: medicine.medicineName,
-
           quantity: item.quantity,
-
           purchasePrice: medicine.purchasePrice,
-
           sellingPrice: item.sellingPrice,
-
           purchaseAmount: purchase,
-
           sellingAmount: selling,
-
           profit,
         });
       });
@@ -219,27 +197,20 @@ export const getBestSellingMedicines = async (req, res) => {
           totalSold: -1,
         },
       },
-
       {
         $limit: 10,
       },
-
       {
         $lookup: {
           from: "medicines",
-
           localField: "_id",
-
           foreignField: "_id",
-
           as: "medicine",
         },
       },
-
       {
         $unwind: "$medicine",
       },
-
       {
         $project: {
           _id: 0,

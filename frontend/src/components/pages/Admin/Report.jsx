@@ -155,76 +155,149 @@ export default function Report() {
   }
 
   return (
-    <div className="space-y-6">
+  <div className="space-y-6">
+
+    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
       <div>
-        <h1 className="text-3xl font-bold">Reports</h1>
-        <p className="text-gray-500">Generate Pharmacy Reports</p>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
+          Analytics
+        </p>
+
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
+          Reports
+        </h1>
+
+        <p className="mt-1 text-sm text-stone-500">
+          Generate and export pharmacy reports.
+        </p>
+      </div>
+    </div>
+
+    <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-5 shadow-sm">
+
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+
+        <div className="w-full lg:max-w-xs">
+          <label className="mb-2 block text-sm font-medium text-stone-700">
+            Report Type
+          </label>
+
+          <div className="relative">
+            <select
+              value={reportType}
+              onChange={(e) => setReportType(e.target.value)}
+              className="w-full appearance-none rounded-xl border border-stone-200 bg-white px-4 py-3 pr-10 text-sm text-stone-800 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+            >
+              <option value="">Select Report</option>
+              <option value="today">Today's Sales</option>
+              <option value="weekly">Weekly Sales</option>
+              <option value="monthly">Monthly Sales</option>
+              <option value="profit">Profit Report</option>
+              <option value="purchase">Purchase Report</option>
+              <option value="best-selling">
+                Best Selling Medicines
+              </option>
+              <option value="low-stock">Low Stock</option>
+              <option value="out-of-stock">Out Of Stock</option>
+              <option value="expired">Expired Medicines</option>
+              <option value="near-expiry">Near Expiry</option>
+            </select>
+
+            <svg
+              className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+
+          <button
+            onClick={handleGenerate}
+            className="rounded-xl bg-stone-900 px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-stone-800 hover:shadow-md"
+          >
+            Generate Report
+          </button>
+
+          <button
+            onClick={handleExportPDF}
+            disabled={formattedReports.length === 0}
+            className="rounded-xl border border-stone-200 bg-white px-5 py-3 text-sm font-medium text-stone-700 shadow-sm transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Export PDF
+          </button>
+
+          <button
+            onClick={handleExportExcel}
+            disabled={formattedReports.length === 0}
+            className="rounded-xl border border-stone-200 bg-white px-5 py-3 text-sm font-medium text-stone-700 shadow-sm transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Export Excel
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+
+    <div className="overflow-hidden rounded-2xl border border-stone-200 bg-[#faf9f6] shadow-sm">
+
+      <div className="flex items-center justify-between border-b border-stone-200 px-5 py-4">
+        <div>
+          <h2 className="text-base font-semibold text-stone-900">
+            Report Data
+          </h2>
+
+          <p className="mt-1 text-xs text-stone-400">
+            {formattedReports.length > 0
+              ? `${formattedReports.length} records found`
+              : "Generate a report to view results"}
+          </p>
+        </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow p-5 flex flex-wrap gap-4 items-center">
-        <select
-          value={reportType}
-          onChange={(e) => setReportType(e.target.value)}
-          className="border rounded-lg px-4 py-2 outline-none focus:border-blue-500"
-        >
-          <option value="">Select Report</option>
-          <option value="today">Today's Sales</option>
-          <option value="weekly">Weekly Sales</option>
-          <option value="monthly">Monthly Sales</option>
-          <option value="profit">Profit Report</option>
-          <option value="purchase">Purchase Report</option>
-          <option value="best-selling">Best Selling Medicines</option>
-          <option value="low-stock">Low Stock</option>
-          <option value="out-of-stock">Out Of Stock</option>
-          <option value="expired">Expired Medicines</option>
-          <option value="near-expiry">Near Expiry</option>
-        </select>
+      <div className="max-h-[600px] overflow-auto">
 
-        <button
-          onClick={handleGenerate}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-          Generate Report
-        </button>
-
-        <button
-          onClick={handleExportPDF}
-          disabled={formattedReports.length === 0}
-          className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Export PDF
-        </button>
-        
-        <button
-          onClick={handleExportExcel}
-          disabled={formattedReports.length === 0}
-          className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Export Excel
-        </button>
-      </div>
-
-      <div className="bg-white rounded-xl shadow overflow-auto max-h-[600px]">
         <table className="min-w-full">
-          <thead className="bg-gray-100 border-b sticky top-0">
+
+          <thead className="sticky top-0 z-10 border-b border-stone-200 bg-stone-50">
+
             <tr>
               {formattedReports.length > 0 &&
                 Object.keys(formattedReports[0]).map((key) => (
                   <th
                     key={key}
-                    className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap"
+                    className="whitespace-nowrap px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-stone-500"
                   >
                     {key}
                   </th>
                 ))}
             </tr>
+
           </thead>
-          <tbody>
+
+          <tbody className="divide-y divide-stone-100">
+
             {formattedReports.length > 0 ? (
               formattedReports.map((item, index) => (
-                <tr key={index} className="border-b hover:bg-gray-50">
+                <tr
+                  key={index}
+                  className="transition hover:bg-stone-50/80"
+                >
                   {Object.values(item).map((value, i) => (
-                    <td key={i} className="p-4 text-gray-700 whitespace-nowrap">
+                    <td
+                      key={i}
+                      className="whitespace-nowrap px-5 py-4 text-sm text-stone-600"
+                    >
                       {value}
                     </td>
                   ))}
@@ -234,15 +307,26 @@ export default function Report() {
               <tr>
                 <td
                   colSpan="20"
-                  className="text-center py-12 text-gray-500 font-medium"
+                  className="px-5 py-16 text-center"
                 >
-                  No Report Generated or No Data Found.
+                  <p className="text-sm font-medium text-stone-700">
+                    No Report Generated
+                  </p>
+
+                  <p className="mt-1 text-xs text-stone-400">
+                    Select a report type and generate the report to view data.
+                  </p>
                 </td>
               </tr>
             )}
+
           </tbody>
+
         </table>
+
       </div>
     </div>
-  );
+
+  </div>
+);
 }

@@ -213,9 +213,7 @@ export const adjustStock = async (req, res) => {
 export const getLowStock = async (req, res) => {
   try {
     const medicines = await medicineModel
-      .find({
-        stockQuantity: { $lte: 10 },
-      })
+      .find({ $expr: { $lte: ["$stockQuantity", "$reorderLevel"] } })
       .populate("supplier", "supplierName");
 
     res.status(200).json({
@@ -279,7 +277,6 @@ export const getNearExpiryInventory = async (req, res) => {
 
     const next30Days = new Date();
     next30Days.setDate(today.getDate() + 30);
-
     const medicines = await medicineModel
       .find({
         expiryDate: {

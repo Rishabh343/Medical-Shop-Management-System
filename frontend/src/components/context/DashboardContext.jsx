@@ -12,7 +12,7 @@ export default function DashboardProvider({ children }) {
 
       const response = await api.get("/dashboard");
 
-      setDashboard(response.data.data);
+      setDashboard(response.data);
 
       return response.data.data;
     } catch (error) {

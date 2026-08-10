@@ -26,7 +26,7 @@ export default function Inventory() {
 
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
-  
+
   // Modal States
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -57,7 +57,19 @@ export default function Inventory() {
         getInventory();
     }
   };
+  useEffect(() => {
+    // Set a timer to wait 500ms after the user stops typing
+    const delayDebounceFn = setTimeout(() => {
+      if (search.trim() === "") {
+        getInventory();
+      } else {
+        searchInventory(search);
+      }
+    }, 500);
 
+    // Cleanup: If the user types again before 500ms, destroy the old timer
+    return () => clearTimeout(delayDebounceFn);
+  }, [search]); // This runs every time 'search' changes
   const handleStockIn = async (id) => {
     const qty = prompt("Enter quantity to ADD to stock:");
     if (qty && !isNaN(qty) && Number(qty) > 0) {
@@ -79,9 +91,12 @@ export default function Inventory() {
   };
 
   // Filter the global stock movements for the currently selected inventory item
-  const currentItemHistory = stockMovement?.filter(
-    (mov) => mov.inventory?._id === selectedItem?._id || mov.inventory === selectedItem?._id
-  ) || [];
+  const currentItemHistory =
+    stockMovement?.filter(
+      (mov) =>
+        mov.inventory?._id === selectedItem?._id ||
+        mov.inventory === selectedItem?._id,
+    ) || [];
 
   const getStatus = (stock, reorderLevel, expiryDate) => {
     const today = new Date();
@@ -127,220 +142,412 @@ export default function Inventory() {
     return <Loader />;
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Inventory Management</h1>
-          <p className="text-gray-500">Manage medicine stock and inventory.</p>
-        </div>
+return (
+  <div className="space-y-6">
+
+    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      <div>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
+          Inventory
+        </p>
+
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
+          Inventory Management
+        </h1>
+
+        <p className="mt-1 text-sm text-stone-500">
+          Monitor medicine stock, expiry dates and stock movements.
+        </p>
       </div>
 
-      {/* Filter Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <button
-          onClick={() => setFilter("all")}
-          className={`p-4 rounded-lg shadow font-semibold transition ${
-            filter === "all" ? "bg-blue-600 text-white" : "bg-white hover:bg-gray-100"
-          }`}
+      <div className="relative">
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="
+            appearance-none
+            min-w-[190px]
+            rounded-xl
+            border
+            border-stone-200
+            bg-[#faf9f6]
+            px-4
+            py-2.5
+            pr-10
+            text-sm
+            font-medium
+            text-stone-700
+            outline-none
+            transition
+            hover:border-stone-300
+            focus:border-stone-900
+            focus:ring-1
+            focus:ring-stone-900
+          "
         >
-          All Inventory
-        </button>
+          <option value="all">All Inventory</option>
+          <option value="low">Low Stock</option>
+          <option value="out">Out of Stock</option>
+          <option value="near">Near Expiry</option>
+          <option value="expired">Expired</option>
+        </select>
 
-        <button
-          onClick={() => setFilter("low")}
-          className={`p-4 rounded-lg shadow font-semibold transition ${
-            filter === "low" ? "bg-yellow-500 text-white" : "bg-white hover:bg-gray-100"
-          }`}
+        <svg
+          className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-          Low Stock
-        </button>
-
-        <button
-          onClick={() => setFilter("out")}
-          className={`p-4 rounded-lg shadow font-semibold transition ${
-            filter === "out" ? "bg-red-500 text-white" : "bg-white hover:bg-gray-100"
-          }`}
-        >
-          Out of Stock
-        </button>
-
-        <button
-          onClick={() => setFilter("near")}
-          className={`p-4 rounded-lg shadow font-semibold transition ${
-            filter === "near" ? "bg-orange-500 text-white" : "bg-white hover:bg-gray-100"
-          }`}
-        >
-          Near Expiry
-        </button>
-
-        <button
-          onClick={() => setFilter("expired")}
-          className={`p-4 rounded-lg shadow font-semibold transition ${
-            filter === "expired" ? "bg-gray-800 text-white" : "bg-white hover:bg-gray-100"
-          }`}
-        >
-          Expired
-        </button>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
       </div>
+    </div>
 
-      {/* Search Bar */}
-      <div className="bg-white rounded-xl shadow p-4">
+    <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-4 shadow-sm">
+      <div className="relative">
         <input
           type="text"
           placeholder="Search medicine..."
           value={search}
-          onChange={(e) => {
-            const value = e.target.value;
-            setSearch(value);
-            if (value.trim() === "") {
-              getInventory();
-            } else {
-              searchInventory(value);
-            }
-          }}
-          className="w-full border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 transition"
+          onChange={(e) => setSearch(e.target.value)}
+          className="
+            w-full
+            rounded-xl
+            border
+            border-stone-200
+            bg-white
+            px-4
+            py-3
+            text-sm
+            text-stone-900
+            outline-none
+            transition
+            placeholder:text-stone-400
+            focus:border-stone-900
+            focus:ring-1
+            focus:ring-stone-900
+          "
         />
       </div>
+    </div>
 
-      {/* History Modal */}
-      <Modal
-        isOpen={historyModalOpen}
-        onClose={() => setHistoryModalOpen(false)}
-        title={`Stock History: ${selectedItem?.medicineName || ""}`}
-      >
-        <div className="space-y-4">
-          {loading && stockMovement.length === 0 ? (
-            <div className="flex justify-center py-8"><Loader /></div>
-          ) : currentItemHistory.length > 0 ? (
-            <div className="max-h-80 overflow-y-auto border rounded-lg shadow-inner">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-gray-100 sticky top-0">
-                  <tr>
-                    <th className="p-3 border-b">Date</th>
-                    <th className="p-3 border-b">Type</th>
-                    <th className="p-3 border-b text-center">Qty</th>
-                    <th className="p-3 border-b text-right">Remarks</th>
+    <Modal
+      isOpen={historyModalOpen}
+      onClose={() => setHistoryModalOpen(false)}
+      title={`Stock History: ${selectedItem?.medicineName || ""}`}
+    >
+      <div className="space-y-4">
+
+        {loading && stockMovement.length === 0 ? (
+          <div className="flex justify-center py-8">
+            <Loader />
+          </div>
+        ) : currentItemHistory.length > 0 ? (
+          <div className="max-h-80 overflow-y-auto rounded-xl border border-stone-200">
+            <table className="w-full text-left text-sm">
+
+              <thead className="sticky top-0 border-b border-stone-200 bg-stone-50">
+                <tr>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                    Date
+                  </th>
+
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                    Type
+                  </th>
+
+                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                    Qty
+                  </th>
+
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-stone-500">
+                    Remarks
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-stone-100">
+                {currentItemHistory.map((mov) => (
+                  <tr
+                    key={mov._id}
+                    className="transition hover:bg-stone-50"
+                  >
+                    <td className="px-4 py-3 text-sm text-stone-600">
+                      {new Date(mov.createdAt).toLocaleDateString(
+                        "en-IN",
+                        {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        },
+                      )}
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          mov.type === "IN" ||
+                          mov.movementType === "IN"
+                            ? "bg-stone-100 text-stone-700"
+                            : "bg-stone-900 text-white"
+                        }`}
+                      >
+                        {mov.type || mov.movementType || "N/A"}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3 text-center text-sm font-semibold text-stone-800">
+                      {mov.quantity}
+                    </td>
+
+                    <td className="px-4 py-3 text-right text-xs text-stone-500">
+                      {mov.remarks || mov.reason || "-"}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {currentItemHistory.map((mov) => (
-                    <tr key={mov._id} className="border-b hover:bg-gray-50">
-                      <td className="p-3 text-gray-600">
-                        {new Date(mov.createdAt).toLocaleDateString("en-IN", {
-                          day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
-                        })}
-                      </td>
-                      <td className="p-3">
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                          mov.type === "IN" || mov.movementType === "IN" 
-                            ? "bg-green-100 text-green-700" 
-                            : "bg-red-100 text-red-700"
-                        }`}>
-                          {mov.type || mov.movementType || "N/A"}
-                        </span>
-                      </td>
-                      <td className="p-3 text-center font-bold">
-                        {mov.quantity}
-                      </td>
-                      <td className="p-3 text-right text-gray-500 text-xs">
-                        {mov.remarks || mov.reason || "-"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="py-8 text-center text-gray-500">
-              No stock movement history found for this item.
-            </div>
-          )}
-        </div>
-      </Modal>
+                ))}
+              </tbody>
 
-      {/* Inventory Table */}
-      <div className="bg-white rounded-xl shadow overflow-x-auto relative">
-        {loading && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex justify-center items-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}
-        
-        <table className="min-w-full">
-          <thead className="bg-gray-100 border-b">
+            </table>
+          </div>
+        ) : (
+          <div className="rounded-xl bg-stone-50 py-10 text-center">
+            <p className="text-sm font-medium text-stone-700">
+              No stock movement history
+            </p>
+
+            <p className="mt-1 text-xs text-stone-400">
+              There are no recorded movements for this medicine.
+            </p>
+          </div>
+        )}
+
+      </div>
+    </Modal>
+
+    <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-[#faf9f6] shadow-sm">
+
+      {loading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#faf9f6]/70 backdrop-blur-[1px]">
+          <div className="h-7 w-7 animate-spin rounded-full border-2 border-stone-200 border-t-stone-900" />
+        </div>
+      )}
+
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[950px]">
+
+          <thead className="border-b border-stone-200 bg-stone-50/70">
             <tr>
-              <th className="p-4 text-left font-semibold text-gray-700">Medicine</th>
-              <th className="p-4 text-left font-semibold text-gray-700">Batch</th>
-              <th className="p-4 text-center font-semibold text-gray-700">Stock</th>
-              <th className="p-4 text-center font-semibold text-gray-700">Reorder</th>
-              <th className="p-4 text-center font-semibold text-gray-700">Expiry</th>
-              <th className="p-4 text-center font-semibold text-gray-700">Status</th>
-              <th className="p-4 text-center font-semibold text-gray-700">Actions</th>
+
+              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Medicine
+              </th>
+
+              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Batch
+              </th>
+
+              <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Stock
+              </th>
+
+              <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Reorder
+              </th>
+
+              <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Expiry
+              </th>
+
+              <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Status
+              </th>
+
+              <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Actions
+              </th>
+
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className="divide-y divide-stone-100">
+
             {inventory.length > 0 ? (
               inventory.map((item) => (
-                <tr key={item._id} className="border-b hover:bg-gray-50 transition">
-                  <td className="p-4 font-medium text-gray-800">{item.medicineName}</td>
-                  <td className="p-4 text-gray-600">{item.batchNumber}</td>
-                  <td className="p-4 text-center font-bold text-gray-800">{item.stockQuantity}</td>
-                  <td className="p-4 text-center text-gray-600">{item.reorderLevel}</td>
-                  <td className="p-4 text-center text-gray-600">
-                    {new Date(item.expiryDate).toLocaleDateString("en-IN", {
-                      month: 'short', year: 'numeric', day: 'numeric'
-                    })}
-                  </td>
-                  <td className="p-4 text-center">
-                    {getStatus(item.stockQuantity, item.reorderLevel, item.expiryDate)}
-                  </td>
-                  <td className="p-4">
-                    <div className="flex justify-center gap-2">
-                      <button
-                        onClick={() => handleStockIn(item._id)}
-                        title="Add Stock"
-                        className="flex items-center gap-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-1.5 rounded text-sm font-medium transition"
-                      >
-                        <FaArrowUp size={12} /> IN
-                      </button>
+                <tr
+                  key={item._id}
+                  className="transition hover:bg-stone-50/80"
+                >
 
-                      <button
-                        onClick={() => handleStockOut(item._id)}
-                        title="Remove Stock"
-                        className="flex items-center gap-1 bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1.5 rounded text-sm font-medium transition"
-                      >
-                        <FaArrowDown size={12} /> OUT
-                      </button>
+                  <td className="px-5 py-4">
+                    <p className="text-sm font-semibold text-stone-900">
+                      {item.medicineName}
+                    </p>
+                  </td>
 
-                      <button
-                        onClick={() => handleViewHistory(item)}
-                        className="flex items-center gap-1 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1.5 rounded text-sm font-medium transition"
-                      >
-                        <FaHistory size={12} /> Hist
-                      </button>
+                  <td className="px-5 py-4 text-sm text-stone-600">
+                    {item.batchNumber}
+                  </td>
+
+                  <td className="px-5 py-4 text-center">
+                    <span className="inline-flex min-w-10 justify-center rounded-full bg-stone-100 px-3 py-1.5 text-xs font-semibold text-stone-700">
+                      {item.stockQuantity}
+                    </span>
+                  </td>
+
+                  <td className="px-5 py-4 text-center text-sm text-stone-600">
+                    {item.reorderLevel}
+                  </td>
+
+                  <td className="px-5 py-4 text-center text-sm text-stone-500">
+                    {new Date(item.expiryDate).toLocaleDateString(
+                      "en-IN",
+                      {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      },
+                    )}
+                  </td>
+
+                  <td className="px-5 py-4 text-center">
+                    {getStatus(
+                      item.stockQuantity,
+                      item.reorderLevel,
+                      item.expiryDate,
+                    )}
+                  </td>
+
+                  <td className="px-5 py-4 text-center">
+
+                    <div className="relative inline-block">
+
+                      <details className="group">
+                        <summary
+                          className="
+                            flex
+                            cursor-pointer
+                            list-none
+                            items-center
+                            gap-2
+                            rounded-lg
+                            border
+                            border-stone-200
+                            bg-white
+                            px-3
+                            py-2
+                            text-xs
+                            font-medium
+                            text-stone-600
+                            shadow-sm
+                            transition
+                            hover:border-stone-300
+                            hover:bg-stone-50
+                          "
+                        >
+                          Actions
+
+                          <svg
+                            className="h-3.5 w-3.5 text-stone-400 transition group-open:rotate-180"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </summary>
+
+                        <div className="absolute right-0 z-30 mt-2 w-40 overflow-hidden rounded-xl border border-stone-200 bg-white p-1 text-left shadow-xl">
+
+                          <button
+                            type="button"
+                            onClick={() => handleStockIn(item._id)}
+                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-stone-700 transition hover:bg-stone-50"
+                          >
+                            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100 text-stone-700">
+                              <FaArrowUp size={11} />
+                            </span>
+
+                            Stock In
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleStockOut(item._id)}
+                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-stone-700 transition hover:bg-stone-50"
+                          >
+                            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100 text-stone-700">
+                              <FaArrowDown size={11} />
+                            </span>
+
+                            Stock Out
+                          </button>
+
+                          <div className="my-1 border-t border-stone-100" />
+
+                          <button
+                            type="button"
+                            onClick={() => handleViewHistory(item)}
+                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-stone-700 transition hover:bg-stone-50"
+                          >
+                            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100 text-stone-700">
+                              <FaHistory size={11} />
+                            </span>
+
+                            Stock History
+                          </button>
+
+                        </div>
+                      </details>
+
                     </div>
+
                   </td>
+
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={7} className="text-center py-12 text-gray-500 font-medium">
-                  No Inventory Found
+                <td
+                  colSpan={7}
+                  className="px-5 py-14 text-center"
+                >
+                  <p className="text-sm font-medium text-stone-700">
+                    No Inventory Found
+                  </p>
+
+                  <p className="mt-1 text-xs text-stone-400">
+                    No medicines match the selected filter.
+                  </p>
                 </td>
               </tr>
             )}
+
           </tbody>
+
         </table>
-        
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="p-4 border-t">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          </div>
-        )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="border-t border-stone-200 px-5 py-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      )}
+
     </div>
-  );
+  </div>
+);
 }

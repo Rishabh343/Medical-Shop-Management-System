@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useMemo, useState, useEffect } from "react";
 import { FaPlus, FaSearch, FaTrash } from "react-icons/fa";
 import { MedicineContext } from "../../context/MedicineContext";
 import { CustomerContext } from "../../context/CustomerContext";
@@ -8,109 +8,124 @@ import { useNavigate } from "react-router-dom";
 export default function Billing() {
   const navigate = useNavigate();
   const { createBill } = useContext(BillingContext);
-  const { medicine, getMedicine } = useContext(MedicineContext);
-  const { customer, getCustomer } = useContext(CustomerContext);
+  
+  const { medicine, searchMedicine } = useContext(MedicineContext);
+  const { customer, searchCustomer } = useContext(CustomerContext);
+
+  // States
   const [selectedCustomer, setSelectedCustomer] = useState("");
-  const [selectedMedicine, setSelectedMedicine] = useState("");
+  const [selectedMedicineObj, setSelectedMedicineObj] = useState(null); 
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [items, setItems] = useState([]);
-  // Search
+  
+  // Search Inputs
   const [customerSearch, setCustomerSearch] = useState("");
   const [medicineSearch, setMedicineSearch] = useState("");
+  
+  // Dropdown Visibility
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+  const [showMedicineDropdown, setShowMedicineDropdown] = useState(false);
+
   // Reward Points
   const [rewardPoints, setRewardPoints] = useState(0);
   const [rewardPointsToRedeem, setRewardPointsToRedeem] = useState(0);
+
+
   useEffect(() => {
-    getMedicine();
-    getCustomer();
-  }, []);
-
-  // Customer Search
-  const filteredCustomers = customer.filter(
-    (item) =>
-      item.customerName.toLowerCase().includes(customerSearch.toLowerCase()) ||
-      item.phoneNumber.includes(customerSearch),
-  );
-  // Medicine Search
-  const filteredMedicines = medicine.filter((item) =>
-    item.medicineName.toLowerCase().includes(medicineSearch.toLowerCase()),
-  );
-  // Customer Selection
-  const handleCustomerSelect = (id) => {
-    setSelectedCustomer(id);
-    const selected = customer.find((item) => item._id === id);
-
-    if (selected) {
-      setRewardPoints(selected.rewardPoints);
-
-      setRewardPointsToRedeem(0);
-
-      setCustomerSearch(`${selected.customerName} (${selected.phoneNumber})`);
+    // If the input is empty or a customer is already selected, don't search
+    if (!customerSearch.trim() || selectedCustomer) {
+      setShowCustomerDropdown(false);
+      return;
     }
+
+    // Set a timer to wait for 500ms after the user stops typing
+    const delayDebounceFn = setTimeout(async () => {
+      await searchCustomer(customerSearch);
+      setShowCustomerDropdown(true);
+    }, 500);
+
+    // Cleanup function clears the timer if the user types again before 500ms
+    return () => clearTimeout(delayDebounceFn);
+  }, [customerSearch, selectedCustomer]);
+
+
+
+  useEffect(() => {
+    // If the input is empty or a medicine is already selected, don't search
+    if (!medicineSearch.trim() || selectedMedicineObj) {
+      setShowMedicineDropdown(false);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      await searchMedicine(medicineSearch);
+      setShowMedicineDropdown(true);
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [medicineSearch, selectedMedicineObj]);
+
+  const handleCustomerSelect = (cust) => {
+    setSelectedCustomer(cust._id);
+    setRewardPoints(cust.rewardPoints || 0);
+    setRewardPointsToRedeem(0);
+    setCustomerSearch(`${cust.customerName} (${cust.phoneNumber})`);
+    setShowCustomerDropdown(false);
   };
 
-  // Medicine Selection
-  const handleMedicineSelect = (id) => {
-    setSelectedMedicine(id);
-
-    const selected = medicine.find((item) => item._id === id);
-
-    if (selected) {
-      setMedicineSearch(`${selected.medicineName} | ₹${selected.sellingPrice}`);
-    }
+  const handleMedicineSelect = (med) => {
+    setSelectedMedicineObj(med);
+    setMedicineSearch(`${med.medicineName} | ₹${med.sellingPrice}`);
+    setShowMedicineDropdown(false);
   };
 
-  // Add Medicine
   const addMedicine = () => {
-    if (!selectedMedicine) return;
+    if (!selectedMedicineObj) {
+      alert("Please search and select a medicine first.");
+      return;
+    }
 
-    const medicineData = medicine.find((item) => item._id === selectedMedicine);
-
-    if (!medicineData) return;
-
-    const exists = items.find((item) => item.medicineId === medicineData._id);
-
+    const exists = items.find((item) => item.medicineId === selectedMedicineObj._id);
     if (exists) {
       alert("Medicine already added");
+      return;
+    }
+
+    if (selectedMedicineObj.stockQuantity <= 0) {
+      alert("This medicine is out of stock!");
       return;
     }
 
     setItems((prev) => [
       ...prev,
       {
-        medicineId: medicineData._id,
-        medicineName: medicineData.medicineName,
-        price: medicineData.sellingPrice,
+        medicineId: selectedMedicineObj._id,
+        medicineName: selectedMedicineObj.medicineName,
+        price: selectedMedicineObj.sellingPrice,
         quantity: 1,
-        stock: medicineData.stockQuantity,
+        stock: selectedMedicineObj.stockQuantity,
       },
     ]);
 
-    setSelectedMedicine("");
-
+    setSelectedMedicineObj(null);
     setMedicineSearch("");
   };
 
-  // Quantity
+
   const handleQuantityChange = (index, quantity) => {
     const updated = [...items];
-
     if (Number(quantity) > updated[index].stock) {
       alert("Stock not available");
       return;
     }
-
     updated[index].quantity = Number(quantity);
-
     setItems(updated);
   };
 
-  // Remove Medicine
   const removeMedicine = (index) => {
     setItems(items.filter((_, i) => i !== index));
   };
 
-  // Calculations
   const subtotal = useMemo(() => {
     return items.reduce((total, item) => total + item.price * item.quantity, 0);
   }, [items]);
@@ -130,17 +145,17 @@ export default function Billing() {
   const finalTotal = useMemo(() => {
     return grandTotal - discount;
   }, [grandTotal, discount]);
+
+
   const handleGenerateBill = async () => {
     if (!selectedCustomer) {
       alert("Please select a customer.");
       return;
     }
-
     if (items.length === 0) {
       alert("Please add at least one medicine.");
       return;
     }
-
     if (rewardPointsToRedeem > rewardPoints) {
       alert("Reward points exceed available balance.");
       return;
@@ -150,7 +165,6 @@ export default function Billing() {
       customerId: selectedCustomer,
       paymentMethod,
       rewardPointsToRedeem,
-
       medicines: items.map((item) => ({
         medicineId: item.medicineId,
         quantity: item.quantity,
@@ -159,13 +173,13 @@ export default function Billing() {
 
     try {
       const bill = await createBill(billData);
-
       alert("Bill Generated Successfully");
       navigate(`/invoice/${bill.data._id}`);
+      
       // Reset Form
       setSelectedCustomer("");
       setCustomerSearch("");
-      setSelectedMedicine("");
+      setSelectedMedicineObj(null);
       setMedicineSearch("");
       setRewardPoints(0);
       setRewardPointsToRedeem(0);
@@ -176,90 +190,147 @@ export default function Billing() {
       alert(error.response?.data?.message || "Failed to generate bill.");
     }
   };
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Billing</h1>
-          <p className="text-gray-500">Create Customer Invoice</p>
-        </div>
-        <button
-          onClick={handleGenerateBill}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-        >
-          Generate Bill
-        </button>
+  <div className="space-y-6">
+
+    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      <div>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
+          Sales
+        </p>
+
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
+          Billing
+        </h1>
+
+        <p className="mt-1 text-sm text-stone-500">
+          Create and manage customer invoices.
+        </p>
       </div>
-      {/* Customer Details */}
-      <div className="bg-white rounded-xl shadow p-5">
-        <h2 className="text-xl font-semibold mb-5">Customer Details</h2>
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Customer Search */}
-          <div className="relative">
-            <label className="font-medium">Customer</label>
-            <div className="relative mt-2">
-              <FaSearch className="absolute left-3 top-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search Customer..."
-                value={customerSearch}
-                onChange={(e) => {
-                  setCustomerSearch(e.target.value);
-                  setSelectedCustomer("");
-                }}
-                className="w-full border rounded-lg pl-10 pr-4 py-3"
-              />
-            </div>
-            {customerSearch && !selectedCustomer && (
-              <div className="absolute w-full bg-white border rounded-lg shadow-lg max-h-56 overflow-y-auto z-20">
-                {filteredCustomers.length > 0 ? (
-                  filteredCustomers.map((item) => (
-                    <div
-                      key={item._id}
-                      onClick={() => handleCustomerSelect(item._id)}
-                      className="p-3 hover:bg-gray-100 cursor-pointer border-b"
-                    >
-                      <div className="font-semibold">{item.customerName}</div>
-                      <div className="text-sm text-gray-500">
-                        {item.phoneNumber}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-3 text-gray-500">No Customer Found</div>
-                )}
-              </div>
-            )}
-          </div>
-          {/* Payment */}
-          <div>
-            <label className="font-medium">Payment Method</label>
-            <select
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-              className="w-full border rounded-lg p-3 mt-2"
-            >
-              <option>Cash</option>
-              <option>UPI</option>
-              <option>Card</option>
-            </select>
-          </div>
+
+      <button
+        onClick={handleGenerateBill}
+        className="flex items-center justify-center gap-2 rounded-xl bg-stone-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-stone-800 hover:shadow-md"
+      >
+        Generate Bill
+      </button>
+    </div>
+
+    <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-5 shadow-sm">
+
+      <div className="mb-5 flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-stone-900">
+            Customer Details
+          </h2>
+
+          <p className="mt-1 text-sm text-stone-500">
+            Select a customer and payment method.
+          </p>
         </div>
-        {/* Reward Points */}
-        {selectedCustomer && (
-          <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-5">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold">Reward Points</h3>
-                <p className="text-gray-500 text-sm">Available Balance</p>
-              </div>
-              <div className="text-2xl font-bold text-yellow-600">
-                {rewardPoints}
-              </div>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+
+        <div className="relative">
+          <label className="mb-2 block text-sm font-medium text-stone-700">
+            Customer
+          </label>
+
+          <div className="relative">
+            <FaSearch
+              size={14}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"
+            />
+
+            <input
+              type="text"
+              placeholder="Search name or phone..."
+              value={customerSearch}
+              onChange={(e) => {
+                setCustomerSearch(e.target.value);
+                setSelectedCustomer("");
+              }}
+              className="w-full rounded-xl border border-stone-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+            />
+          </div>
+
+          {showCustomerDropdown && (
+            <div className="absolute left-0 right-0 z-30 mt-2 max-h-60 overflow-y-auto rounded-xl border border-stone-200 bg-white p-1 shadow-xl">
+
+              {customer.length > 0 ? (
+                customer.map((item) => (
+                  <div
+                    key={item._id}
+                    onClick={() => handleCustomerSelect(item)}
+                    className="cursor-pointer rounded-lg px-4 py-3 transition hover:bg-stone-50"
+                  >
+                    <div className="text-sm font-semibold text-stone-900">
+                      {item.customerName}
+                    </div>
+
+                    <div className="mt-1 text-xs text-stone-500">
+                      {item.phoneNumber}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-4 text-sm text-stone-500">
+                  No customer found
+                </div>
+              )}
+
             </div>
-            <div className="mt-4">
-              <label className="font-medium">Redeem Reward Points</label>
+          )}
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-stone-700">
+            Payment Method
+          </label>
+
+          <select
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+          >
+            <option>Cash</option>
+            <option>UPI</option>
+            <option>Card</option>
+          </select>
+        </div>
+
+      </div>
+
+      {selectedCustomer && (
+        <div className="mt-5 rounded-xl border border-stone-200 bg-white p-4">
+
+          <div className="flex items-center justify-between gap-4">
+
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wider text-stone-400">
+                Reward Points
+              </p>
+
+              <p className="mt-1 text-sm text-stone-500">
+                Available balance
+              </p>
+            </div>
+
+            <div className="text-xl font-semibold text-stone-900">
+              {rewardPoints}
+            </div>
+
+          </div>
+
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+
+            <div className="flex-1">
+              <label className="mb-2 block text-sm font-medium text-stone-700">
+                Redeem Reward Points
+              </label>
+
               <input
                 type="number"
                 min={0}
@@ -268,193 +339,313 @@ export default function Billing() {
                 onChange={(e) =>
                   setRewardPointsToRedeem(Number(e.target.value))
                 }
-                className="w-full border rounded-lg p-3 mt-2"
+                className="w-full rounded-xl border border-stone-200 bg-[#faf9f6] px-4 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
               />
-              <button
-                type="button"
-                onClick={() => setRewardPointsToRedeem(rewardPoints)}
-                className="mt-3 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg"
-              >
-                Redeem Maximum
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-      {/* Medicines */}
-      <div className="bg-white rounded-xl shadow p-5">
-        <div className="flex justify-between items-center mb-5">
-          <h2 className="text-xl font-semibold">Medicines</h2>
-          <div className="flex gap-3">
-            <div className="relative w-96">
-              <FaSearch className="absolute left-3 top-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search Medicine..."
-                value={medicineSearch}
-                onChange={(e) => {
-                  setMedicineSearch(e.target.value);
-                  setSelectedMedicine("");
-                }}
-                className="w-full border rounded-lg pl-10 pr-4 py-3"
-              />
-              {medicineSearch && !selectedMedicine && (
-                <div className="absolute w-full bg-white border rounded-lg shadow-lg max-h-64 overflow-y-auto z-20">
-                  {filteredMedicines.length > 0 ? (
-                    filteredMedicines.map((item) => (
-                      <div
-                        key={item._id}
-                        onClick={() => handleMedicineSelect(item._id)}
-                        className="p-3 hover:bg-gray-100 cursor-pointer border-b"
-                      >
-                        <div className="font-semibold">{item.medicineName}</div>
-                        <div className="text-sm text-gray-500">
-                          ₹{item.sellingPrice}
-                          {" • "}
-                          Stock :{item.stockQuantity}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-3 text-gray-500">No Medicine Found</div>
-                  )}
-                </div>
-              )}
             </div>
 
             <button
-              onClick={addMedicine}
-              className="bg-green-600 hover:bg-green-700 text-white px-5 rounded-lg flex items-center gap-2"
+              type="button"
+              onClick={() => setRewardPointsToRedeem(rewardPoints)}
+              className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-100"
             >
-              <FaPlus />
-              Add
+              Redeem Maximum
             </button>
+
           </div>
-        </div>{" "}
-        {/* Medicine Table */}
-        <table className="w-full">
-          <thead className="bg-gray-100">
+
+        </div>
+      )}
+
+    </div>
+
+    <div className="overflow-visible rounded-2xl border border-stone-200 bg-[#faf9f6] p-5 shadow-sm">
+
+      <div className="mb-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+
+        <div>
+          <h2 className="text-lg font-semibold text-stone-900">
+            Medicines
+          </h2>
+
+          <p className="mt-1 text-sm text-stone-500">
+            Add medicines to the current invoice.
+          </p>
+        </div>
+
+        <div className="flex w-full gap-2 sm:max-w-lg">
+
+          <div className="relative w-full">
+
+            <FaSearch
+              size={14}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"
+            />
+
+            <input
+              type="text"
+              placeholder="Search medicine..."
+              value={medicineSearch}
+              onChange={(e) => {
+                setMedicineSearch(e.target.value);
+                setSelectedMedicineObj(null);
+              }}
+              className="w-full rounded-xl border border-stone-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+            />
+
+            {showMedicineDropdown && (
+              <div className="absolute left-0 right-0 top-full z-30 mt-2 max-h-64 overflow-y-auto rounded-xl border border-stone-200 bg-white p-1 shadow-xl">
+
+                {medicine.length > 0 ? (
+                  medicine.map((item) => (
+                    <div
+                      key={item._id}
+                      onClick={() => handleMedicineSelect(item)}
+                      className="flex cursor-pointer items-center justify-between gap-4 rounded-lg px-4 py-3 transition hover:bg-stone-50"
+                    >
+                      <div>
+                        <div className="text-sm font-semibold text-stone-900">
+                          {item.medicineName}
+                        </div>
+
+                        <div className="mt-1 text-xs text-stone-500">
+                          ₹{item.sellingPrice}
+                        </div>
+                      </div>
+
+                      <div className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-600">
+                        Stock: {item.stockQuantity}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-4 text-sm text-stone-500">
+                    No medicine found
+                  </div>
+                )}
+
+              </div>
+            )}
+
+          </div>
+
+          <button
+            onClick={addMedicine}
+            className="flex items-center gap-2 rounded-xl bg-stone-900 px-4 text-sm font-medium text-white transition hover:bg-stone-800"
+          >
+            <FaPlus size={12} />
+            Add
+          </button>
+
+        </div>
+
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-stone-200 bg-white">
+
+        <table className="w-full min-w-[760px]">
+
+          <thead className="border-b border-stone-200 bg-stone-50">
+
             <tr>
-              <th className="p-3 text-left">Medicine</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Medicine
+              </th>
 
-              <th className="p-3 text-center">Stock</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Stock
+              </th>
 
-              <th className="p-3 text-center">Price</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Price
+              </th>
 
-              <th className="p-3 text-center">Quantity</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Quantity
+              </th>
 
-              <th className="p-3 text-center">Total</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Total
+              </th>
 
-              <th className="p-3 text-center">Action</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Action
+              </th>
             </tr>
+
           </thead>
 
-          <tbody>
+          <tbody className="divide-y divide-stone-100">
+
             {items.length > 0 ? (
               items.map((item, index) => (
-                <tr key={item.medicineId} className="border-b hover:bg-gray-50">
-                  <td className="p-3 font-medium">{item.medicineName}</td>
+                <tr
+                  key={item.medicineId}
+                  className="transition hover:bg-stone-50"
+                >
 
-                  <td className="p-3 text-center">{item.stock}</td>
+                  <td className="px-4 py-4">
+                    <p className="text-sm font-semibold text-stone-900">
+                      {item.medicineName}
+                    </p>
+                  </td>
 
-                  <td className="p-3 text-center">₹{item.price}</td>
+                  <td className="px-4 py-4 text-center text-sm text-stone-500">
+                    {item.stock}
+                  </td>
 
-                  <td className="p-3 text-center">
+                  <td className="px-4 py-4 text-center text-sm text-stone-700">
+                    ₹{item.price}
+                  </td>
+
+                  <td className="px-4 py-4 text-center">
+
                     <input
                       type="number"
                       min={1}
                       max={item.stock}
                       value={item.quantity}
                       onChange={(e) =>
-                        handleQuantityChange(index, e.target.value)
+                        handleQuantityChange(
+                          index,
+                          e.target.value,
+                        )
                       }
-                      className="border rounded-lg w-20 text-center py-1"
+                      className="w-20 rounded-lg border border-stone-200 bg-[#faf9f6] px-2 py-1.5 text-center text-sm text-stone-900 outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
                     />
+
                   </td>
 
-                  <td className="p-3 text-center font-semibold">
+                  <td className="px-4 py-4 text-center text-sm font-semibold text-stone-900">
                     ₹{(item.price * item.quantity).toFixed(2)}
                   </td>
 
-                  <td className="p-3 text-center">
+                  <td className="px-4 py-4 text-center">
+
                     <button
                       onClick={() => removeMedicine(index)}
-                      className="text-red-600 hover:text-red-800"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-stone-200 text-stone-400 transition hover:border-stone-300 hover:bg-stone-50 hover:text-red-600"
                     >
-                      <FaTrash />
+                      <FaTrash size={12} />
                     </button>
+
                   </td>
+
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-500">
-                  No Medicines Added
+                <td
+                  colSpan={6}
+                  className="px-5 py-12 text-center"
+                >
+                  <p className="text-sm font-medium text-stone-700">
+                    No Medicines Added
+                  </p>
+
+                  <p className="mt-1 text-xs text-stone-400">
+                    Search and add medicines to create the invoice.
+                  </p>
                 </td>
               </tr>
             )}
+
           </tbody>
+
         </table>
+
       </div>
 
-      {/* Bill Summary */}
+    </div>
 
-      <div className="bg-white rounded-xl shadow p-6">
-        <h2 className="text-xl font-semibold mb-6">Bill Summary</h2>
+    <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-6 shadow-sm">
 
-        <div className="space-y-4">
-          <div className="flex justify-between">
+      <div className="mb-5">
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
+          Invoice
+        </p>
+
+        <h2 className="mt-1 text-lg font-semibold text-stone-900">
+          Bill Summary
+        </h2>
+      </div>
+
+      <div className="mx-auto max-w-xl">
+
+        <div className="space-y-4 text-sm">
+
+          <div className="flex justify-between text-stone-600">
             <span>Subtotal</span>
 
-            <span>₹{subtotal.toFixed(2)}</span>
+            <span className="font-medium text-stone-900">
+              ₹{subtotal.toFixed(2)}
+            </span>
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between text-stone-600">
             <span>GST (10%)</span>
 
-            <span>₹{gst.toFixed(2)}</span>
+            <span className="font-medium text-stone-900">
+              ₹{gst.toFixed(2)}
+            </span>
           </div>
 
-          <div className="flex justify-between text-green-600">
+          <div className="flex justify-between text-stone-600">
             <span>Reward Discount</span>
 
-            <span>- ₹{discount.toFixed(2)}</span>
+            <span className="font-medium text-stone-900">
+              - ₹{discount.toFixed(2)}
+            </span>
           </div>
 
-          <hr />
+          <div className="border-t border-stone-200 pt-4">
 
-          <div className="flex justify-between text-2xl font-bold">
-            <span>Grand Total</span>
+            <div className="flex items-center justify-between">
 
-            <span>₹{finalTotal.toFixed(2)}</span>
-          </div>
-
-          <div className="bg-blue-50 border rounded-lg p-4 mt-4">
-            <div className="flex justify-between">
-              <span>Reward Points Used</span>
-
-              <span className="font-semibold">⭐ {rewardPointsToRedeem}</span>
-            </div>
-
-            <div className="flex justify-between mt-2">
-              <span>Reward Points You'll Earn</span>
-
-              <span className="font-semibold text-green-600">
-                ⭐{Math.floor(finalTotal / 100)}
+              <span className="text-base font-semibold text-stone-900">
+                Grand Total
               </span>
+
+              <span className="text-2xl font-semibold tracking-tight text-stone-900">
+                ₹{finalTotal.toFixed(2)}
+              </span>
+
             </div>
+
           </div>
 
-          <div className="pt-5 flex justify-end">
-            <button
-              onClick={handleGenerateBill}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg"
-            >
-              Generate Bill
-            </button>
-          </div>
         </div>
+
+        <div className="mt-5 rounded-xl border border-stone-200 bg-white p-4">
+
+          <div className="flex justify-between text-sm text-stone-600">
+            <span>Reward Points Used</span>
+
+            <span className="font-semibold text-stone-900">
+              {rewardPointsToRedeem}
+            </span>
+          </div>
+
+          <div className="mt-3 flex justify-between text-sm text-stone-600">
+            <span>Reward Points You'll Earn</span>
+
+            <span className="font-semibold text-stone-900">
+              {Math.floor(finalTotal / 100)}
+            </span>
+          </div>
+
+        </div>
+
+        <button
+          onClick={handleGenerateBill}
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-stone-900 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-stone-800 hover:shadow-md"
+        >
+          Generate Bill
+        </button>
+
       </div>
+
     </div>
-  );
+
+  </div>
+);
 }

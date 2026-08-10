@@ -59,7 +59,19 @@ export default function UserProvider({ children }) {
       setLoading(false);
     }
   };
-
+const forgotPassword = async (email) => {
+    try {
+      setLoading(true);
+      // Ensure you have this endpoint in your backend!
+      const response = await api.post("/user/forgot-password", { email });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
   // Delete User
   const deleteUser = async (id) => {
     try {
@@ -99,6 +111,7 @@ export default function UserProvider({ children }) {
         loading,
         registerUser,
         loginUser,
+        forgotPassword,
         getUsers,
         deleteUser,
         logoutUser,

@@ -9,26 +9,26 @@ import InventoryProvider from "./components/context/InventoryContext.jsx";
 import BillingProvider from "./components/context/BillingContext";
 import DashboardProvider from "./components/context/DashboardContext.jsx";
 import ReportProvider from "./components/context/ReportContext.jsx";
-import UserProvider from "./components/context/userContext.jsx";
+import UserProvider from "./components/context/UserContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <UserProvider>
-    <ReportProvider>
-      <DashboardProvider>
-        <MedicineProvider>
-          <InventoryProvider>
-            <SupplierProvider>
-              <CustomerProvider>
-                <BillingProvider>
-                  <App />
-                </BillingProvider>
-              </CustomerProvider>
-            </SupplierProvider>
-          </InventoryProvider>
-        </MedicineProvider>
-      </DashboardProvider>
-    </ReportProvider>
+      <ReportProvider>
+        <DashboardProvider>
+          <MedicineProvider>
+            <InventoryProvider>
+              <SupplierProvider>
+                <CustomerProvider>
+                  <BillingProvider>
+                    <App />
+                  </BillingProvider>
+                </CustomerProvider>
+              </SupplierProvider>
+            </InventoryProvider>
+          </MedicineProvider>
+        </DashboardProvider>
+      </ReportProvider>
     </UserProvider>
   </StrictMode>,
 );

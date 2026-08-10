@@ -31,7 +31,11 @@ const medicineSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    reorderLevel: {
+      type: String,
 
+      trim: true,
+    },
     manufacturingDate: {
       type: Date,
       // required: true,

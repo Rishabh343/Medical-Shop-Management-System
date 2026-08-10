@@ -167,7 +167,7 @@ export const searchCustomer = async (req, res) => {
     const { keyword } = req.query;
 
     const customers = await customerModel.find({
-      $or: [{ customerName: { $regex: keyword, $options: "i" } }],
+      $or: [{ customerName: { $regex: `^${keyword}`, $options: "i" } }],
     });
 
     res.status(200).json({
