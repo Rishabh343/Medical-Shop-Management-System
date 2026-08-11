@@ -5,7 +5,11 @@ import { MedicineContext } from "../../context/MedicineContext";
 import { SupplierContext } from "../../context/SupplierContext";
 import Pagination from "../../common/Pagination";
 import { FaPlus, FaSearch, FaEdit, FaTrash, FaPills } from "react-icons/fa";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 export default function Medicines() {
+  const navigate = useNavigate();
   const {
     medicine,
     loading,
@@ -45,11 +49,11 @@ export default function Medicines() {
     stockQuantity: "",
     supplier: "",
   });
-
+  const [medicineImage, setMedicineImage] = useState(null);
   const role = localStorage.getItem("role");
   useEffect(() => {
     getMedicine(1);
-     getSupplier();
+    getSupplier();
   }, []);
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -82,6 +86,7 @@ export default function Medicines() {
       stockQuantity: "",
       supplier: "",
     });
+    setMedicineImage(null);
     setEditing(false);
     setSelectedId(null);
   };
@@ -152,9 +157,9 @@ export default function Medicines() {
     try {
       await deleteMedicine(id);
       await getMedicine(currentPage);
-      alert("Medicine Deleted Successfully");
+      toast.success("Medicine Deleted Successfully");
     } catch (error) {
-      console.log(error);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -169,18 +174,36 @@ export default function Medicines() {
     e.preventDefault();
 
     try {
-      if (editing) {
-        await updateMedicine(selectedId, formData);
-        alert("Medicine Updated Successfully");
-      } else {
-        await addMedicine(formData);
-        alert("Medicine Added Successfully");
+      const data = new FormData();
+
+      data.append("medicineName", formData.medicineName);
+      data.append("genericName", formData.genericName);
+      data.append("category", formData.category);
+      data.append("company", formData.company);
+      data.append("batchNumber", formData.batchNumber);
+      data.append("expiryDate", formData.expiryDate);
+      data.append("purchasePrice", formData.purchasePrice);
+      data.append("sellingPrice", formData.sellingPrice);
+      data.append("stockQuantity", formData.stockQuantity);
+      data.append("supplier", formData.supplier);
+
+      if (medicineImage) {
+        data.append("medicineImage", medicineImage);
       }
+
+      if (editing) {
+        await updateMedicine(selectedId, data);
+        toast.success("Medicine Updated Successfully");
+      } else {
+        await addMedicine(data);
+        toast.success("Medicine Added Successfully");
+      }
+
       await getMedicine(currentPage);
       closeModal();
     } catch (error) {
       console.log(error);
-      alert(error.response?.data?.message || "Something went wrong");
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -190,18 +213,27 @@ export default function Medicines() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
-            Inventory
-          </p>
+        <div className="flex items-start gap-4">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="mt-1 flex h-10 items-center gap-2 rounded-xl border border-stone-200 bg-[#faf9f6] px-4 text-sm font-medium text-stone-700 shadow-sm transition hover:bg-white hover:text-stone-900"
+          >
+            <ArrowLeft size={15} />
+          </button>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
+              Inventory
+            </p>
 
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
-            Medicines
-          </h1>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
+              Medicines
+            </h1>
 
-          <p className="mt-1 text-sm text-stone-500">
-            Manage pharmacy medicines and stock.
-          </p>
+            <p className="mt-1 text-sm text-stone-500">
+              Manage pharmacy medicines and stock.
+            </p>
+          </div>
         </div>
 
         {role === "Admin" && (
@@ -453,7 +485,18 @@ export default function Medicines() {
               </select>
             </div>
           </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-stone-700">
+              Medicine Image
+            </label>
 
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setMedicineImage(e.target.files[0])}
+              className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-700"
+            />
+          </div>
           <button
             type="submit"
             className="mt-2 w-full rounded-xl bg-stone-900 py-3 text-sm font-medium text-white transition hover:bg-stone-800 hover:shadow-md"
@@ -471,9 +514,12 @@ export default function Medicines() {
         )}
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] text-left">
+          <table className="w-full min-w-[1000px] text-left">
             <thead className="border-b border-stone-200 bg-stone-50/70">
               <tr>
+                <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                  Image
+                </th>
                 <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-stone-500">
                   Medicine
                 </th>
@@ -513,6 +559,23 @@ export default function Medicines() {
                     key={item._id}
                     className="transition hover:bg-stone-50/80"
                   >
+                    {/* Image */}
+                    <td className="px-5 py-4">
+                      
+                      {item.medicineImage ? (
+                        <img
+                          src={item.medicineImage}
+                          alt={item.medicineName}
+                          className="h-12 w-12 rounded-xl border border-stone-200 object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-stone-100 text-stone-400">
+                          <FaPills size={16} />
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Medicine */}
                     <td className="px-5 py-4">
                       <div>
                         <p className="text-sm font-semibold text-stone-900">
@@ -527,14 +590,17 @@ export default function Medicines() {
                       </div>
                     </td>
 
+                    {/* Company */}
                     <td className="px-5 py-4 text-sm text-stone-600">
                       {item.company}
                     </td>
 
+                    {/* Supplier */}
                     <td className="px-5 py-4 text-sm text-stone-600">
                       {item.supplier?.supplierName || "N/A"}
                     </td>
 
+                    {/* Stock */}
                     <td className="px-5 py-4 text-center">
                       <span
                         className={`inline-flex min-w-10 justify-center rounded-full px-3 py-1.5 text-xs font-semibold ${
@@ -547,16 +613,19 @@ export default function Medicines() {
                       </span>
                     </td>
 
+                    {/* Price */}
                     <td className="px-5 py-4 text-center text-sm font-medium text-stone-900">
                       ₹{Number(item.sellingPrice).toLocaleString("en-IN")}
                     </td>
 
+                    {/* Expiry */}
                     <td className="px-5 py-4 text-center text-sm text-stone-500">
                       {item.expiryDate
                         ? new Date(item.expiryDate).toLocaleDateString()
                         : "-"}
                     </td>
 
+                    {/* Actions */}
                     {role === "Admin" && (
                       <td className="px-5 py-4">
                         <div className="flex justify-center gap-2">

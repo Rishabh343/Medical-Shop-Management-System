@@ -9,10 +9,8 @@ export default function MainLayout() {
         <Navbar />
       </header>
 
-      <main className="min-h-[calc(100vh-68px)] p-4 md:p-6 lg:p-8">
-        <div className="mx-auto w-full max-w-7xl">
-          <Outlet />
-        </div>
+      <main className="min-h-[calc(100vh-68px)] w-full p-4 md:p-6 lg:p-8">
+        <Outlet />
       </main>
     </div>
   );

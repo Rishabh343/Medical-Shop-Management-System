@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./components/pages/Login";
 import MainLayout from "./components/layout/MainLayout";
-import DashboardPharmasist from "./components/pages/Pharmasist/Customer";
+
 
 // Admin Pages
 import Dashboard from "./components/pages/Admin/Dashboard";
@@ -69,7 +69,7 @@ function App() {
           <Route
             path="/admin/medicine"
             element={
-              <ProtectedRoute allowedRoles={["Admin", "Pharmasist"]}>
+              <ProtectedRoute allowedRoles={["Admin", "Pharmacist"]}>
                 <Medicines />
               </ProtectedRoute>
             }
@@ -96,7 +96,7 @@ function App() {
           <Route
             path="/admin/customers"
             element={
-              <ProtectedRoute allowedRoles={["Admin", "Pharmasist"]}>
+              <ProtectedRoute allowedRoles={["Admin", "Pharmacist"]}>
                 <Customers />
               </ProtectedRoute>
             }
@@ -105,7 +105,7 @@ function App() {
           <Route
             path="/admin/billing"
             element={
-              <ProtectedRoute allowedRoles={["Admin", "Pharmasist"]}>
+              <ProtectedRoute allowedRoles={["Admin", "Pharmacist"]}>
                 <Billing />
               </ProtectedRoute>
             }
@@ -131,19 +131,12 @@ function App() {
 
           {/* PHARMACIST */}
 
-          <Route
-            path="/pharmacist/dashboard"
-            element={
-              <ProtectedRoute allowedRole="Pharmasist">
-                <DashboardPharmasist />
-              </ProtectedRoute>
-            }
-          />
+    
 
           <Route
             path="/pharmacist/medicine"
             element={
-              <ProtectedRoute allowedRole="Pharmasist">
+              <ProtectedRoute allowedRole="Pharmacist">
                 <Medicines />
               </ProtectedRoute>
             }
@@ -152,7 +145,7 @@ function App() {
           <Route
             path="/pharmacist/customers"
             element={
-              <ProtectedRoute allowedRole="Pharmasist">
+              <ProtectedRoute allowedRole="Pharmacist">
                 <Customers />
               </ProtectedRoute>
             }
@@ -161,7 +154,7 @@ function App() {
           <Route
             path="/pharmacist/billing"
             element={
-              <ProtectedRoute allowedRole="Pharmasist">
+              <ProtectedRoute allowedRole="Pharmacist">
                 <Billing />
               </ProtectedRoute>
             }
@@ -170,7 +163,7 @@ function App() {
           <Route
             path="/invoice/:id"
             element={
-              <ProtectedRoute allowedRoles={["Admin", "Pharmasist"]}>
+              <ProtectedRoute allowedRoles={["Admin", "Pharmacist"]}>
                 <Invoice />
               </ProtectedRoute>
             }

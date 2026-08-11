@@ -1,5 +1,5 @@
 import medicineModel from "../models/medicineModel.js";
-
+import uploadToCloudinary from "../utils/uploadToCloudinary.js";
 export const addMedicine = async (req, res) => {
   try {
     const existingMedicine = await medicineModel.findOne({
@@ -14,7 +14,21 @@ export const addMedicine = async (req, res) => {
       });
     }
 
-    const medicine = await medicineModel.create(req.body);
+    let medicineImage = "";
+
+    if (req.file) {
+      const uploadResult = await uploadToCloudinary(
+        req.file.buffer,
+        "medistock/medicines",
+      );
+
+      medicineImage = uploadResult.secure_url;
+    }
+
+    const medicine = await medicineModel.create({
+      ...req.body,
+      medicineImage,
+    });
 
     res.status(201).json({
       status: true,
@@ -86,6 +100,16 @@ export const getOneMedicine = async (req, res) => {
 export const updateMedicine = async (req, res) => {
   try {
     const { stockQuantity, ...updateData } = req.body;
+
+    // If new image is uploaded
+    if (req.file) {
+      const uploadResult = await uploadToCloudinary(
+        req.file.buffer,
+        "medistock/medicines"
+      );
+
+      updateData.medicineImage = uploadResult.secure_url;
+    }
 
     const medicine = await medicineModel
       .findByIdAndUpdate(req.params.id, updateData, {

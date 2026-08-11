@@ -1,10 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FaTrash, FaUsers } from "react-icons/fa";
-
+import { ArrowLeft } from "lucide-react";
 import Loader from "../../common/Loader";
 import { UserContext } from "../../context/UserContext";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function UserManagement() {
+  const navigate= useNavigate()
   const { users, loading, getUsers, deleteUser } = useContext(UserContext);
 
   const [search, setSearch] = useState("");
@@ -33,30 +36,39 @@ export default function UserManagement() {
 
     try {
       await deleteUser(id);
-      alert("User Deleted Successfully");
+      toast.success("User Deleted Successfully");
     } catch (error) {
       console.log(error);
-      alert("Failed to delete user");
+     toast.error("Failed to delete user");
     }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
-            Administration
-          </p>
+        {" "}
+        <div className="flex items-start gap-4">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="mt-1 flex h-10 items-center gap-2 rounded-xl border border-stone-200 bg-[#faf9f6] px-4 text-sm font-medium text-stone-700 shadow-sm transition hover:bg-white hover:text-stone-900"
+          >
+            <ArrowLeft size={15} />
+          </button>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
+              Administration
+            </p>
 
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
-            User Management
-          </h1>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
+              User Management
+            </h1>
 
-          <p className="mt-1 text-sm text-stone-500">
-            Manage all users and their system access.
-          </p>
+            <p className="mt-1 text-sm text-stone-500">
+              Manage all users and their system access.
+            </p>
+          </div>
         </div>
-
         <div className="flex items-center gap-3 rounded-xl border border-stone-200 bg-[#faf9f6] px-4 py-2.5 shadow-sm">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-stone-900 text-white">
             <FaUsers size={13} />
