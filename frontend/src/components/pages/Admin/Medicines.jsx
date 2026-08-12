@@ -4,7 +4,15 @@ import Loader from "../../common/Loader";
 import { MedicineContext } from "../../context/MedicineContext";
 import { SupplierContext } from "../../context/SupplierContext";
 import Pagination from "../../common/Pagination";
-import { FaPlus, FaSearch, FaEdit, FaTrash, FaPills } from "react-icons/fa";
+import {
+  FaPlus,
+  FaSearch,
+  FaEdit,
+  FaTrash,
+  FaPills,
+  FaFilter,
+  FaTimes,
+} from "react-icons/fa";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -33,6 +41,7 @@ export default function Medicines() {
   const [search, setSearch] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
   // Modal States
   const [openModal, setOpenModal] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -248,83 +257,256 @@ export default function Medicines() {
         )}
       </div>
 
-      <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-4 shadow-sm">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-          <div className="relative">
+      <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-3 shadow-sm">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
+          {/* Search */}
+          <div className="relative flex-1">
             <FaSearch
               size={14}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"
             />
+
             <input
               type="text"
-              placeholder="Search medicine..."
+              placeholder="Search medicines by name or generic name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-stone-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+              className="h-12 w-full rounded-xl border border-stone-200 bg-white pl-11 pr-4 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 hover:border-stone-300 focus:border-stone-900 focus:ring-1 focus:ring-stone-900/5"
             />
           </div>
 
-          <select
-            value={category}
-            onChange={(e) => {
-              setCategory(e.target.value);
-              handleFilter(e.target.value, company, selectedSupplier);
-            }}
-            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm text-stone-700 outline-none focus:border-stone-900"
-          >
-            <option value="">All Categories</option>
-            {[
-              ...new Set(medicine.map((item) => item.category).filter(Boolean)),
-            ].map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
+          {/* Filter */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setFilterOpen((prev) => !prev)}
+              className={`flex h-12 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium transition ${
+                category || company || selectedSupplier
+                  ? "border-stone-900 bg-stone-900 text-white shadow-sm"
+                  : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50"
+              }`}
+            >
+              <FaFilter size={12} />
 
-          <select
-            value={company}
-            onChange={(e) => {
-              setCompany(e.target.value);
-              handleFilter(category, e.target.value, selectedSupplier);
-            }}
-            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm text-stone-700 outline-none focus:border-stone-900"
-          >
-            <option value="">All Companies</option>
-            {[
-              ...new Set(medicine.map((item) => item.company).filter(Boolean)),
-            ].map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
+              <span>Filters</span>
 
-          <select
-            value={selectedSupplier}
-            onChange={(e) => {
-              setSelectedSupplier(e.target.value);
-              handleFilter(category, company, e.target.value);
-            }}
-            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm text-stone-700 outline-none focus:border-stone-900"
-          >
-            <option value="">All Suppliers</option>
-            {supplier.map((item) => (
-              <option key={item._id} value={item._id}>
-                {item.supplierName}
-              </option>
-            ))}
-          </select>
+              {(category || company || selectedSupplier) && (
+                <span
+                  className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold ${
+                    category || company || selectedSupplier
+                      ? "bg-white text-stone-900"
+                      : ""
+                  }`}
+                >
+                  {[category, company, selectedSupplier].filter(Boolean).length}
+                </span>
+              )}
+            </button>
+
+            {/* Filter Dropdown */}
+            {filterOpen && (
+              <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[320px] overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-[0_12px_40px_rgba(28,25,23,0.12)]">
+                {/* Header */}
+                <div className="border-b border-stone-100 px-5 py-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold text-stone-900">
+                        Filter Medicines
+                      </h3>
+
+                      <p className="mt-0.5 text-xs text-stone-400">
+                        Narrow down your inventory
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setFilterOpen(false)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-stone-400 transition hover:bg-stone-100 hover:text-stone-900"
+                    >
+                      <FaTimes size={11} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Filters */}
+                <div className="space-y-4 p-5">
+                  {/* Category */}
+                  <div>
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+                      Category
+                    </label>
+
+                    <select
+                      value={category}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        setCategory(value);
+                        handleFilter(value, company, selectedSupplier);
+                      }}
+                      className="h-11 w-full appearance-none rounded-xl border border-stone-200 bg-stone-50 px-3 text-sm text-stone-700 outline-none transition hover:border-stone-300 focus:border-stone-900 focus:bg-white"
+                    >
+                      <option value="">All Categories</option>
+
+                      {[
+                        ...new Set(
+                          medicine.map((item) => item.category).filter(Boolean),
+                        ),
+                      ].map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Company */}
+                  <div>
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+                      Company
+                    </label>
+
+                    <select
+                      value={company}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        setCompany(value);
+                        handleFilter(category, value, selectedSupplier);
+                      }}
+                      className="h-11 w-full appearance-none rounded-xl border border-stone-200 bg-stone-50 px-3 text-sm text-stone-700 outline-none transition hover:border-stone-300 focus:border-stone-900 focus:bg-white"
+                    >
+                      <option value="">All Companies</option>
+
+                      {[
+                        ...new Set(
+                          medicine.map((item) => item.company).filter(Boolean),
+                        ),
+                      ].map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Supplier */}
+                  <div>
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+                      Supplier
+                    </label>
+
+                    <select
+                      value={selectedSupplier}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        setSelectedSupplier(value);
+                        handleFilter(category, company, value);
+                      }}
+                      className="h-11 w-full appearance-none rounded-xl border border-stone-200 bg-stone-50 px-3 text-sm text-stone-700 outline-none transition hover:border-stone-300 focus:border-stone-900 focus:bg-white"
+                    >
+                      <option value="">All Suppliers</option>
+
+                      {supplier.map((item) => (
+                        <option key={item._id} value={item._id}>
+                          {item.supplierName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between border-t border-stone-100 bg-stone-50/50 px-5 py-3">
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="text-xs font-medium text-stone-500 transition hover:text-stone-900"
+                  >
+                    Reset
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setFilterOpen(false)}
+                    className="rounded-lg bg-stone-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-stone-800"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
+        {/* Active Filters */}
         {(category || company || selectedSupplier) && (
-          <div className="mt-3 flex justify-end">
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-stone-200/70 pt-3">
+            <span className="mr-1 text-[11px] font-medium text-stone-400">
+              Active:
+            </span>
+
+            {category && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCategory("");
+                  handleFilter("", company, selectedSupplier);
+                }}
+                className="group inline-flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-700 transition hover:border-stone-300 hover:bg-stone-50"
+              >
+                Category: {category}
+                <FaTimes
+                  size={9}
+                  className="text-stone-400 group-hover:text-stone-700"
+                />
+              </button>
+            )}
+
+            {company && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCompany("");
+                  handleFilter(category, "", selectedSupplier);
+                }}
+                className="group inline-flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-700 transition hover:border-stone-300 hover:bg-stone-50"
+              >
+                Company: {company}
+                <FaTimes
+                  size={9}
+                  className="text-stone-400 group-hover:text-stone-700"
+                />
+              </button>
+            )}
+
+            {selectedSupplier && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedSupplier("");
+                  handleFilter(category, company, "");
+                }}
+                className="group inline-flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-700 transition hover:border-stone-300 hover:bg-stone-50"
+              >
+                Supplier:{" "}
+                {supplier.find((item) => item._id === selectedSupplier)
+                  ?.supplierName || "Selected"}
+                <FaTimes
+                  size={9}
+                  className="text-stone-400 group-hover:text-stone-700"
+                />
+              </button>
+            )}
+
             <button
               type="button"
               onClick={clearFilters}
-              className="rounded-lg px-3 py-2 text-xs font-medium text-stone-500 transition hover:bg-stone-100 hover:text-stone-900"
+              className="ml-auto text-xs font-medium text-stone-400 transition hover:text-stone-900"
             >
-              Clear Filters
+              Clear all
             </button>
           </div>
         )}
