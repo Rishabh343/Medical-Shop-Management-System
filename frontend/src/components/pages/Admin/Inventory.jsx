@@ -8,7 +8,7 @@ import Modal from "../../common/Modal";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 export default function Inventory() {
-  const navigate= useNavigate()
+  const navigate = useNavigate();
   const {
     loading,
     inventory,
@@ -32,7 +32,10 @@ export default function Inventory() {
   // Modal States
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-
+  const [stockModalOpen, setStockModalOpen] = useState(false);
+  const [stockAction, setStockAction] = useState(""); // "in" or "out"
+  const [stockQuantity, setStockQuantity] = useState("");
+  const [selectedStockItem, setSelectedStockItem] = useState(null);
   useEffect(() => {
     fetchInventory();
   }, [filter]);
@@ -72,18 +75,18 @@ export default function Inventory() {
     // Cleanup: If the user types again before 500ms, destroy the old timer
     return () => clearTimeout(delayDebounceFn);
   }, [search]); // This runs every time 'search' changes
-  const handleStockIn = async (id) => {
-    const qty = prompt("Enter quantity to ADD to stock:");
-    if (qty && !isNaN(qty) && Number(qty) > 0) {
-      await increaseStock(id, Number(qty));
-    }
+  const handleStockIn = (item) => {
+    setSelectedStockItem(item);
+    setStockAction("in");
+    setStockQuantity("");
+    setStockModalOpen(true);
   };
 
-  const handleStockOut = async (id) => {
-    const qty = prompt("Enter quantity to REMOVE from stock:");
-    if (qty && !isNaN(qty) && Number(qty) > 0) {
-      await decreaseStock(id, Number(qty));
-    }
+  const handleStockOut = (item) => {
+    setSelectedStockItem(item);
+    setStockAction("out");
+    setStockQuantity("");
+    setStockModalOpen(true);
   };
 
   const handleViewHistory = async (item) => {
@@ -326,7 +329,113 @@ export default function Inventory() {
           )}
         </div>
       </Modal>
+      <Modal
+        isOpen={stockModalOpen}
+        onClose={() => setStockModalOpen(false)}
+        title={stockAction === "in" ? "Stock In" : "Stock Out"}
+      >
+        <div className="space-y-5">
+          {/* Medicine */}
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.15em] text-stone-400">
+              Medicine
+            </p>
 
+            <p className="mt-1 text-base font-semibold text-stone-900">
+              {selectedStockItem?.medicineName || "-"}
+            </p>
+          </div>
+
+          {/* Current Stock */}
+          <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50 px-4 py-3">
+            <span className="text-sm text-stone-500">Current Stock</span>
+
+            <span className="text-sm font-semibold text-stone-900">
+              {selectedStockItem?.stockQuantity ?? 0}
+            </span>
+          </div>
+
+          {/* Quantity */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-stone-700">
+              Quantity
+            </label>
+
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-medium text-stone-400">
+                {stockAction === "in" ? "+" : "−"}
+              </span>
+
+              <input
+                type="number"
+                min="1"
+                value={stockQuantity}
+                onChange={(e) => setStockQuantity(e.target.value)}
+                placeholder="Enter quantity"
+                className="w-full rounded-xl border border-stone-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition focus:border-stone-900"
+              />
+            </div>
+          </div>
+
+          {/* New Stock Preview */}
+          {stockQuantity && Number(stockQuantity) > 0 && (
+            <div className="flex items-center justify-between rounded-xl bg-stone-100 px-4 py-3">
+              <span className="text-sm text-stone-500">New Stock</span>
+
+              <span className="text-sm font-semibold text-stone-900">
+                {stockAction === "in"
+                  ? Number(selectedStockItem?.stockQuantity || 0) +
+                    Number(stockQuantity)
+                  : Math.max(
+                      0,
+                      Number(selectedStockItem?.stockQuantity || 0) -
+                        Number(stockQuantity),
+                    )}
+              </span>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setStockModalOpen(false)}
+              className="rounded-xl border border-stone-200 bg-white px-5 py-2.5 text-sm font-medium text-stone-600 transition hover:bg-stone-50"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              disabled={
+                !stockQuantity ||
+                Number(stockQuantity) <= 0 ||
+                (stockAction === "out" &&
+                  Number(stockQuantity) >
+                    Number(selectedStockItem?.stockQuantity || 0))
+              }
+              onClick={async () => {
+                const qty = Number(stockQuantity);
+
+                if (stockAction === "in") {
+                  await increaseStock(selectedStockItem._id, qty);
+                } else {
+                  await decreaseStock(selectedStockItem._id, qty);
+                }
+
+                setStockModalOpen(false);
+                setStockQuantity("");
+                setSelectedStockItem(null);
+
+                await getInventory(currentPage);
+              }}
+              className="rounded-xl bg-stone-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {stockAction === "in" ? "Add Stock" : "Remove Stock"}
+            </button>
+          </div>
+        </div>
+      </Modal>
       <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-[#faf9f6] shadow-sm">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#faf9f6]/70 backdrop-blur-[1px]">
@@ -455,7 +564,7 @@ export default function Inventory() {
                           <div className="absolute right-0 z-30 mt-2 w-40 overflow-hidden rounded-xl border border-stone-200 bg-white p-1 text-left shadow-xl">
                             <button
                               type="button"
-                              onClick={() => handleStockIn(item._id)}
+                              onClick={() => handleStockIn(item)}
                               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-stone-700 transition hover:bg-stone-50"
                             >
                               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100 text-stone-700">
@@ -466,7 +575,7 @@ export default function Inventory() {
 
                             <button
                               type="button"
-                              onClick={() => handleStockOut(item._id)}
+                              onClick={() => handleStockOut(item)}
                               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-stone-700 transition hover:bg-stone-50"
                             >
                               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100 text-stone-700">

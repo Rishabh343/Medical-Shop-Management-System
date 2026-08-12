@@ -8,6 +8,7 @@ import { FaPlus, FaSearch, FaEdit, FaTrash, FaPills } from "react-icons/fa";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import DeleteModal from "../../common/DeleteModal";
 export default function Medicines() {
   const navigate = useNavigate();
   const {
@@ -36,7 +37,8 @@ export default function Medicines() {
   const [openModal, setOpenModal] = useState(false);
   const [editing, setEditing] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedDeleteItem, setSelectedDeleteItem] = useState(null);
   const [formData, setFormData] = useState({
     medicineName: "",
     genericName: "",
@@ -127,7 +129,6 @@ export default function Medicines() {
       if (supplier.length === 0) {
         await getSupplier();
       }
-
       const data = await getByMedicineId(id);
 
       setFormData({
@@ -142,7 +143,6 @@ export default function Medicines() {
         stockQuantity: data.stockQuantity || "",
         supplier: data.supplier?._id || data.supplier || "",
       });
-
       setSelectedId(id);
       setEditing(true);
       setOpenModal(true);
@@ -151,13 +151,14 @@ export default function Medicines() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this medicine?")) return;
-
+  const handleDelete = async () => {
+    if (!selectedDeleteItem) return;
     try {
-      await deleteMedicine(id);
+      await deleteMedicine(selectedDeleteItem._id);
       await getMedicine(currentPage);
       toast.success("Medicine Deleted Successfully");
+      setDeleteModalOpen(false);
+      setSelectedDeleteItem(null);
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     }
@@ -505,7 +506,17 @@ export default function Medicines() {
           </button>
         </form>
       </Modal>
-
+      <DeleteModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setSelectedDeleteItem(null);
+        }}
+        onConfirm={handleDelete}
+        itemName={selectedDeleteItem?.medicineName}
+        title="DeleteMedicine"
+        loading={loading}
+      />
       <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-[#faf9f6] shadow-sm">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#faf9f6]/70 backdrop-blur-[1px]">
@@ -561,7 +572,6 @@ export default function Medicines() {
                   >
                     {/* Image */}
                     <td className="px-5 py-4">
-                      
                       {item.medicineImage ? (
                         <img
                           src={item.medicineImage}
@@ -637,7 +647,10 @@ export default function Medicines() {
                           </button>
 
                           <button
-                            onClick={() => handleDelete(item._id)}
+                            onClick={() => {
+                              setSelectedDeleteItem(item);
+                              setDeleteModalOpen(true);
+                            }}
                             className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:bg-stone-100 hover:text-red-600"
                           >
                             <FaTrash size={13} />

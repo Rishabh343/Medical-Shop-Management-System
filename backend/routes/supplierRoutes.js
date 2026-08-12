@@ -12,7 +12,7 @@ import { auth } from "../middlewares/auth.js";
 
 const supplierRouter = express.Router();
 supplierRouter.post("/create",auth,isAdmin, createSupplier);
-supplierRouter.get("/get",getAllSuppliers);
+supplierRouter.get("/get",auth,isAdmin,getAllSuppliers);
 supplierRouter.get("/search",auth,isAdmin, searchSupplier);
 supplierRouter.get("/get-id/:id",auth,isAdmin, getSupplierById);
 supplierRouter.put("/update/:id",auth,isAdmin, updateSupplier);

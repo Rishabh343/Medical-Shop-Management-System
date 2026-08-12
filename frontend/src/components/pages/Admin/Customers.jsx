@@ -8,8 +8,9 @@ import autoTable from "jspdf-autotable";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import DeleteModal from "../../common/DeleteModal";
 export default function Customers() {
-  const navigate= useNavigate()
+  const navigate = useNavigate();
   const {
     customer,
     loading,
@@ -30,9 +31,11 @@ export default function Customers() {
   const [editing, setEditing] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
-  // States for History Modal
+  // States for  Modal
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedDeleteItem, setSelectedDeleteItem] = useState(null);
   const role = localStorage.getItem("role");
   const [formData, setFormData] = useState({
     customerName: "",
@@ -45,7 +48,6 @@ export default function Customers() {
     getCustomer();
   }, []);
   useEffect(() => {
-    // Set a timer to wait 500ms after the user stops typing
     const delayDebounceFn = setTimeout(() => {
       if (search.trim() === "") {
         getCustomer();
@@ -53,8 +55,6 @@ export default function Customers() {
         searchCustomer(search);
       }
     }, 500);
-
-    // Cleanup: If the user types again before 500ms, destroy the old timer
     return () => clearTimeout(delayDebounceFn);
   }, [search]); // This runs every time 'search' changes
   const resetForm = () => {
@@ -95,14 +95,15 @@ export default function Customers() {
     }
   };
 
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Delete this customer?");
-    if (!confirmDelete) return;
+  const handleDelete = async () => {
+    if (!selectedDeleteItem) return;
 
     try {
-      await deleteCustomer(id);
+      await deleteCustomer(selectedDeleteItem._id);
       await getCustomer();
-     toast.success("Customer deleted successfully");
+      toast.success("Customer deleted successfully");
+      setDeleteModalOpen(false);
+      setSelectedDeleteItem(null);
     } catch (error) {
       console.log(error);
       toast.error(error.response?.data?.message);
@@ -362,7 +363,17 @@ export default function Customers() {
           </button>
         </div>
       </Modal>
-
+      <DeleteModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setSelectedDeleteItem(null);
+        }}
+        onConfirm={handleDelete}
+        itemName={selectedDeleteItem?.customerName}
+        title="Delete Customer"
+        loading={loading}
+      />
       <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-4 shadow-sm">
         <input
           type="text"
@@ -494,7 +505,10 @@ export default function Customers() {
 
                               <button
                                 type="button"
-                                onClick={() => handleDelete(item._id)}
+                                onClick={() => {
+                                  setSelectedDeleteItem(item);
+                                  setDeleteModalOpen(true);
+                                }}
                                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition hover:bg-red-50"
                               >
                                 <FaTrash size={12} />

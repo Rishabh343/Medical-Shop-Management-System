@@ -6,8 +6,9 @@ import Loader from "../../common/Loader";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import DeleteModal from "../../common/DeleteModal";
 export default function Suppliers() {
-  const navigate= useNavigate()
+  const navigate = useNavigate();
   const {
     supplier,
     loading,
@@ -24,7 +25,8 @@ export default function Suppliers() {
   const [openModal, setOpenModal] = useState(false);
   const [editing, setEditing] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedDeleteItem, setSelectedDeleteItem] = useState(null);
   const [formData, setFormData] = useState({
     supplierName: "",
     contactNumber: "",
@@ -32,22 +34,17 @@ export default function Suppliers() {
     gstNumber: "",
     address: "",
   });
+  useEffect(() => {
+    if (search.trim() === "") {
+      getSupplier();
+      return;
+    }
 
-  useEffect(() => {
-    getSupplier();
-  }, []);
-  useEffect(() => {
-    // Set a timer to wait 500ms after the user stops typing
-    const delayDebounceFn = setTimeout(() => {
-      if (search.trim() === "") {
-        getSupplier();
-      } else {
-        searchSupplier(search);
-      }
+    const timer = setTimeout(() => {
+      searchSupplier(search);
     }, 500);
 
-    // Cleanup: If the user types again before 500ms, destroy the old timer
-    return () => clearTimeout(delayDebounceFn);
+    return () => clearTimeout(timer);
   }, [search]);
   const resetForm = () => {
     setFormData({
@@ -92,14 +89,16 @@ export default function Suppliers() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this supplier?")) return;
+  const handleDelete = async () => {
+    if (!selectedDeleteItem) return;
 
     try {
-      await deleteSupplier(id);
+      await deleteSupplier(selectedDeleteItem._id);
       await getSupplier();
 
       toast.success("Supplier Deleted Successfully");
+      setDeleteModalOpen(false);
+      setSelectedDeleteItem(null);
     } catch (error) {
       toast.error(error);
     }
@@ -120,11 +119,11 @@ export default function Suppliers() {
       if (editing) {
         await updateSupplier(selectedId, formData);
 
-       toast.success("Supplier Updated Successfully");
+        toast.success("Supplier Updated Successfully");
       } else {
         await addSupplier(formData);
 
-       toast.success("Supplier Added Successfully");
+        toast.success("Supplier Added Successfully");
       }
 
       await getSupplier();
@@ -133,7 +132,7 @@ export default function Suppliers() {
     } catch (error) {
       console.log(error);
 
-     toast.error(error.response?.data?.message || "Something went wrong");
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -225,6 +224,7 @@ export default function Suppliers() {
               onChange={handleChange}
               placeholder="supplier@example.com"
               className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+              required
             />
           </div>
 
@@ -240,6 +240,7 @@ export default function Suppliers() {
               onChange={handleChange}
               placeholder="Enter GST number"
               className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+              required
             />
           </div>
 
@@ -255,6 +256,7 @@ export default function Suppliers() {
               placeholder="Enter supplier address"
               rows={3}
               className="w-full resize-none rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+              required
             />
           </div>
 
@@ -266,7 +268,17 @@ export default function Suppliers() {
           </button>
         </form>
       </Modal>
-
+      <DeleteModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setSelectedDeleteItem(null);
+        }}
+        onConfirm={handleDelete}
+        itemName={selectedDeleteItem?.supplierName}
+        title="Delete Supplier"
+        loading={loading}
+      />
       <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-4 shadow-sm">
         <div className="relative">
           <input
@@ -358,7 +370,10 @@ export default function Suppliers() {
                         </button>
 
                         <button
-                          onClick={() => handleDelete(item._id)}
+                          onClick={() => {
+                            setSelectedDeleteItem(item);
+                            setDeleteModalOpen(true);
+                          }}
                           className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:bg-stone-100 hover:text-red-600"
                           title="Delete"
                         >

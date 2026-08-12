@@ -5,41 +5,39 @@ import Loader from "../../common/Loader";
 import { UserContext } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import DeleteModal from "../../common/DeleteModal";
 
 export default function UserManagement() {
-  const navigate= useNavigate()
-  const { users, loading, getUsers, deleteUser } = useContext(UserContext);
-
+  const navigate = useNavigate();
+  const { users, loading, getUsers, deleteUser, searchUser } =
+    useContext(UserContext);
   const [search, setSearch] = useState("");
-
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedDeleteItem, setSelectedDeleteItem] = useState(null);
   useEffect(() => {
-    getUsers();
-  }, []);
+    if (search.trim() === "") {
+      getUsers();
+      return;
+    }
 
+    const timer = setTimeout(() => {
+      searchUser(search);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
   if (loading) {
     return <Loader />;
   }
-
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(search.toLowerCase()) ||
-      user.email.toLowerCase().includes(search.toLowerCase()) ||
-      user.phone.includes(search),
-  );
-
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this user?",
-    );
-
-    if (!confirmDelete) return;
-
+  const handleDelete = async () => {
+    if (!selectedDeleteItem) return;
     try {
-      await deleteUser(id);
+      await deleteUser(selectedDeleteItem._id);
       toast.success("User Deleted Successfully");
+      setDeleteModalOpen(false);
+      setSelectedDeleteItem(null);
     } catch (error) {
-      console.log(error);
-     toast.error("Failed to delete user");
+      toast.error("Failed to delete user");
     }
   };
 
@@ -86,7 +84,7 @@ export default function UserManagement() {
       <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-4 shadow-sm">
         <input
           type="text"
-          placeholder="Search by name, email or phone..."
+          placeholder="Search by name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
@@ -103,7 +101,17 @@ export default function UserManagement() {
             View and manage registered users.
           </p>
         </div>
-
+        <DeleteModal
+          isOpen={deleteModalOpen}
+          onClose={() => {
+            setDeleteModalOpen(false);
+            setSelectedDeleteItem(null);
+          }}
+          onConfirm={handleDelete}
+          itemName={selectedDeleteItem?.name}
+          title="Delete User"
+          loading={loading}
+        />
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px]">
             <thead className="border-b border-stone-200 bg-stone-50/70">
@@ -135,8 +143,8 @@ export default function UserManagement() {
             </thead>
 
             <tbody className="divide-y divide-stone-100">
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user, index) => (
+              {users.length > 0 ? (
+                users.map((user, index) => (
                   <tr
                     key={user._id}
                     className="transition hover:bg-stone-50/80"
@@ -173,7 +181,10 @@ export default function UserManagement() {
 
                     <td className="px-5 py-4 text-center">
                       <button
-                        onClick={() => handleDelete(user._id)}
+                        onClick={() => {
+                          setSelectedDeleteItem(user);
+                          setDeleteModalOpen(true);
+                        }}
                         className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 bg-white text-stone-500 transition hover:bg-stone-50 hover:text-red-600"
                         title="Delete User"
                       >

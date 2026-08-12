@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./components/pages/Login";
 import MainLayout from "./components/layout/MainLayout";
 
-
 // Admin Pages
 import Dashboard from "./components/pages/Admin/Dashboard";
 import Medicines from "./components/pages/Admin/Medicines";
@@ -17,6 +16,7 @@ import Report from "./components/pages/Admin/Report";
 import Signup from "./components/pages/Signup";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { Toaster } from "react-hot-toast";
+import ResetPassword from "./components/pages/ResetPassword";
 
 function App() {
   return (
@@ -53,7 +53,7 @@ function App() {
         <Route path="/" element={<Login />} />
 
         <Route path="/signup" element={<Signup />} />
-
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route element={<MainLayout />}>
           {/* ADMIN */}
 
@@ -130,8 +130,6 @@ function App() {
           />
 
           {/* PHARMACIST */}
-
-    
 
           <Route
             path="/pharmacist/medicine"

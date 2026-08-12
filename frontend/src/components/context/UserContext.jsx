@@ -78,12 +78,6 @@ export default function UserProvider({ children }) {
       console.log(error);
     }
   };
-
-  // Logout
-  // const logoutUser = () => {
-  //   localStorage.removeItem("role");
-  //   localStorage.removeItem("token");
-  // };
   const logoutUser = async () => {
     try {
       setLoading(true);
@@ -100,6 +94,17 @@ export default function UserProvider({ children }) {
       setLoading(false);
     }
   };
+  const searchUser = async (keyword) => {
+    try {
+      const response = await api.get(`/user/search?keyword=${keyword}`);
+
+      setUsers(response.data.user);
+    } catch (error) {
+      console.log(error.message);
+      console.log("Axios search error check userContext");
+    }
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -109,6 +114,7 @@ export default function UserProvider({ children }) {
         loginUser,
         forgotPassword,
         getUsers,
+        searchUser,
         deleteUser,
         logoutUser,
       }}

@@ -5,10 +5,11 @@ import {
   getAllBills,
   getBillById,
 } from "../controllers/billingControlller.js";
+import { auth } from "../middlewares/auth.js";
 
 const billingRouter = express.Router();
-billingRouter.post("/", createBill);
-billingRouter.get("/", getAllBills);
-billingRouter.get("/:id", getBillById);
-billingRouter.delete("/:id", deleteBill);
+billingRouter.post("/", auth, createBill);
+billingRouter.get("/", auth, getAllBills);
+billingRouter.get("/:id", auth, getBillById);
+billingRouter.delete("/:id", auth, deleteBill);
 export default billingRouter;
