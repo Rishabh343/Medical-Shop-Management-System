@@ -126,9 +126,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* ==========================
-        PAGE HEADER
-    ========================== */}
+    
 
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
@@ -160,9 +158,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ==========================
-        1. DASHBOARD CARDS
-    ========================== */}
+
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card, index) => (
@@ -216,9 +212,6 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* ==========================
-        2. MONTHLY REVENUE
-    ========================== */}
 
       <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-5 shadow-sm md:p-6">
         <div className="mb-5 flex items-start justify-between">
@@ -336,12 +329,9 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      {/* ==========================
-        3. SALES ANALYTICS
-    ========================== */}
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        {/* Category Sales */}
+       
 
         <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-5 shadow-sm md:p-6">
           <div className="mb-2">
@@ -404,7 +394,7 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
 
-        {/* Top Selling Medicines */}
+
 
         <div className="rounded-2xl border border-stone-200 bg-[#faf9f6] p-5 shadow-sm md:p-6">
           <div className="mb-2">
@@ -480,10 +470,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ==========================
-        4. RECENT ACTIVITY
-    ========================== */}
-
+  
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         {/* Recent Invoices */}
 
@@ -542,7 +529,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Low Stock */}
 
         <div className="overflow-hidden rounded-2xl border border-stone-200 bg-[#faf9f6] shadow-sm">
           <div className="border-b border-stone-200 bg-stone-50/50 px-5 py-4">

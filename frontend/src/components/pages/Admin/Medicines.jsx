@@ -516,6 +516,7 @@ export default function Medicines() {
         isOpen={openModal}
         onClose={closeModal}
         title={editing ? "Update Medicine" : "Add Medicine"}
+        size="xl"
       >
         <form
           onSubmit={handleSubmit}

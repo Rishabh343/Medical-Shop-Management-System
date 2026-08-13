@@ -87,8 +87,6 @@ export default function Login() {
       {/* Main Container */}
 
       <div className="w-full max-w-5xl min-h-[600px] overflow-hidden rounded-[24px] bg-[#faf9f6] shadow-2xl shadow-stone-400/20 grid lg:grid-cols-2">
-        {/* ================= LEFT SIDE ================= */}
-
         <div className="relative hidden overflow-hidden lg:flex">
           {/* Background */}
 
@@ -123,8 +121,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Middle Visual */}
-
             <div className="relative flex justify-center py-10">
               <div className="flex h-52 w-52 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]">
                 <div className="flex h-36 w-36 items-center justify-center rounded-full border border-white/10 bg-white/[0.05]">
@@ -136,8 +132,6 @@ export default function Login() {
                 </div>
               </div>
             </div>
-
-            {/* Bottom Content */}
 
             <div className="max-w-md">
               <p className="mb-3 text-xs uppercase tracking-[0.25em] text-white/50">
@@ -173,8 +167,6 @@ export default function Login() {
           </div>
         </div>
 
-        {/* ================= RIGHT SIDE ================= */}
-
         <div className="flex items-center justify-center px-6 py-10 sm:px-10 lg:px-12">
           <div className="w-full max-w-sm">
             {/* Mobile Logo */}
@@ -192,9 +184,6 @@ export default function Login() {
                 <p className="text-xs text-stone-400">Inventory Management</p>
               </div>
             </div>
-
-            {/* ================= HEADER ================= */}
-
             <div className="mb-8">
               <div className="mb-3 flex items-center gap-2">
                 {view === "login" ? (
@@ -222,9 +211,6 @@ export default function Login() {
                   : "Enter your registered email to receive a password reset link."}
               </p>
             </div>
-
-            {/* ================= LOGIN ================= */}
-
             {view === "login" ? (
               <form onSubmit={handleLoginSubmit} className="space-y-5">
                 {/* Email */}
@@ -268,8 +254,6 @@ export default function Login() {
                     />
                   </div>
                 </div>
-
-                {/* Password */}
 
                 <div>
                   <div className="mb-2 flex items-center justify-between">
@@ -320,8 +304,6 @@ export default function Login() {
                     />
                   </div>
                 </div>
-
-                {/* Login */}
 
                 <button
                   type="submit"
@@ -379,8 +361,6 @@ export default function Login() {
                 </button>
               </form>
             ) : (
-              /* ================= FORGOT PASSWORD ================= */
-
               <form onSubmit={handleForgotSubmit} className="space-y-5">
                 {/* Email */}
 
@@ -422,9 +402,6 @@ export default function Login() {
                     />
                   </div>
                 </div>
-
-                {/* Reset */}
-
                 <button
                   type="submit"
                   disabled={loading}
@@ -445,9 +422,6 @@ export default function Login() {
                 >
                   {loading ? "Sending link..." : "Send Reset Link"}
                 </button>
-
-                {/* Back */}
-
                 <button
                   type="button"
                   onClick={() => setView("login")}
@@ -468,9 +442,6 @@ export default function Login() {
                 </button>
               </form>
             )}
-
-            {/* Footer */}
-
             <div className="mt-8 border-t border-stone-200 pt-5">
               <div className="flex items-center justify-center gap-2 text-xs text-stone-400">
                 <ShieldCheck size={14} />

@@ -1,5 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
-import { FaPlus, FaEdit, FaTrash, FaEye, FaFileDownload } from "react-icons/fa";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaEye,
+  FaFileDownload,
+  FaFileInvoiceDollar,
+} from "react-icons/fa";
 import Modal from "../../common/Modal";
 import Loader from "../../common/Loader";
 import { CustomerContext } from "../../context/CustomerContext";
@@ -301,48 +308,256 @@ export default function Customers() {
         title={`Purchase History: ${
           selectedCustomer?.customerName || "Customer"
         }`}
+        size="xl"
       >
         <div className="space-y-5">
+          {selectedCustomer && (
+            <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <div>
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-stone-400">
+                    Customer
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-stone-900">
+                    {selectedCustomer.customerName}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-stone-400">
+                    Phone
+                  </p>
+                  <p className="mt-1 text-sm text-stone-700">
+                    {selectedCustomer.phoneNumber || "-"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-stone-400">
+                    Total Orders
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-stone-900">
+                    {selectedCustomer.totalOrders || 0}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-stone-400">
+                    Reward Points
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-stone-900">
+                    {selectedCustomer.rewardPoints || 0}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-4 border-t border-stone-200 pt-4">
+                <div>
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-stone-400">
+                    Lifetime Purchase
+                  </p>
+
+                  <p className="mt-1 text-lg font-semibold text-stone-900">
+                    ₹
+                    {Number(
+                      selectedCustomer.lifetimePurchase || 0,
+                    ).toLocaleString("en-IN")}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-stone-400">
+                    Last Purchase
+                  </p>
+
+                  <p className="mt-1 text-sm font-medium text-stone-700">
+                    {selectedCustomer.lastPurchase
+                      ? new Date(
+                          selectedCustomer.lastPurchase,
+                        ).toLocaleDateString("en-IN")
+                      : "-"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {purchaseHistory && purchaseHistory.length > 0 ? (
-            <div className="max-h-72 overflow-y-auto rounded-xl border border-stone-200">
-              <table className="w-full text-left text-sm">
-                <thead className="sticky top-0 border-b border-stone-200 bg-stone-50">
-                  <tr>
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
-                      Date
-                    </th>
+            <div className="max-h-[420px] overflow-y-auto rounded-2xl border border-stone-200">
+              <div className="divide-y divide-stone-100">
+                {purchaseHistory.map((bill) => (
+                  <div
+                    key={bill._id}
+                    className="p-4 transition hover:bg-stone-50/70"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-stone-100 text-stone-600">
+                            <FaFileInvoiceDollar size={13} />
+                          </div>
 
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
-                      Bill #
-                    </th>
+                          <div>
+                            <p className="text-sm font-semibold text-stone-900">
+                              {bill.billNumber}
+                            </p>
 
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-stone-500">
-                      Amount
-                    </th>
-                  </tr>
-                </thead>
+                            <p className="text-xs text-stone-400">
+                              {new Date(
+                                bill.createdAt || bill.billDate,
+                              ).toLocaleDateString("en-IN", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
 
-                <tbody className="divide-y divide-stone-100">
-                  {purchaseHistory.map((bill) => (
-                    <tr key={bill._id} className="transition hover:bg-stone-50">
-                      <td className="px-4 py-3 text-sm text-stone-600">
-                        {new Date(bill.createdAt).toLocaleDateString("en-IN")}
-                      </td>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                          bill.paymentStatus === "Paid"
+                            ? "bg-emerald-50 text-emerald-600"
+                            : "bg-amber-50 text-amber-600"
+                        }`}
+                      >
+                        {bill.paymentStatus || "Pending"}
+                      </span>
+                    </div>
 
-                      <td className="px-4 py-3 text-sm text-stone-600">
-                        {bill.billNumber}
-                      </td>
+                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      {/* <div>
+                  <p className="text-[10px] uppercase tracking-wider text-stone-400">
+                    Items
+                  </p>
 
-                      <td className="px-4 py-3 text-right text-sm font-semibold text-stone-900">
-                        ₹{bill.finalAmount?.toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  <p className="mt-1 text-sm font-medium text-stone-700">
+                    {bill.items?.length || 0}
+                  </p>
+                </div> */}
+
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-stone-400">
+                          Total
+                        </p>
+
+                        <p className="mt-1 text-sm font-medium text-stone-700">
+                          ₹
+                          {Number(bill.totalAmount || 0).toLocaleString(
+                            "en-IN",
+                          )}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-stone-400">
+                          Discount
+                        </p>
+
+                        <p className="mt-1 text-sm font-medium text-stone-700">
+                          ₹{Number(bill.discount || 0).toLocaleString("en-IN")}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-stone-400">
+                          Final Amount
+                        </p>
+
+                        <p className="mt-1 text-sm font-semibold text-stone-900">
+                          ₹
+                          {Number(bill.finalAmount || 0).toLocaleString(
+                            "en-IN",
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    {bill.items?.length > 0 && (
+                      <div className="mt-4 rounded-xl bg-stone-50 p-3">
+                        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                          Medicines
+                        </p>
+
+                        <div className="space-y-2">
+                          {bill.items.map((item, index) => (
+                            <div
+                              key={`${bill._id}-${index}`}
+                              className="flex items-center justify-between gap-3 text-xs"
+                            >
+                              <div className="min-w-0">
+                                <p className="truncate font-medium text-stone-700">
+                                  {item.medicine?.medicineName || "Medicine"}
+                                </p>
+
+                                <p className="text-[10px] text-stone-400">
+                                  Qty: {item.quantity} × ₹
+                                  {Number(
+                                    item.sellingPrice || 0,
+                                  ).toLocaleString("en-IN")}
+                                </p>
+                              </div>
+
+                              <p className="shrink-0 font-semibold text-stone-800">
+                                ₹
+                                {Number(item.totalPrice || 0).toLocaleString(
+                                  "en-IN",
+                                )}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3">
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <p className="text-[10px] text-stone-400">Payment</p>
+                          <p className="text-xs font-medium text-stone-700">
+                            {bill.paymentMethod || "-"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-[10px] text-stone-400">Rewards</p>
+                          <p className="text-xs font-medium text-stone-700">
+                            +{bill.rewardPointsEarned || 0}
+                          </p>
+                        </div>
+
+                        {bill.rewardPointsRedeemed > 0 && (
+                          <div>
+                            <p className="text-[10px] text-stone-400">
+                              Redeemed
+                            </p>
+                            <p className="text-xs font-medium text-stone-700">
+                              {bill.rewardPointsRedeemed}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/invoice/${bill._id}`)}
+                        className="flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 transition hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900"
+                      >
+                        <FaEye size={11} />
+                        View Invoice
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="rounded-xl bg-stone-50 py-10 text-center">
+              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-stone-400">
+                <FaFileInvoiceDollar size={15} />
+              </div>
+
               <p className="text-sm font-medium text-stone-700">
                 No purchase history found
               </p>
@@ -354,12 +569,13 @@ export default function Customers() {
           )}
 
           <button
+            type="button"
             onClick={downloadHistoryReport}
             disabled={!purchaseHistory || purchaseHistory.length === 0}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-stone-900 py-3 text-sm font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-300"
           >
             <FaFileDownload size={13} />
-            Download PDF Report
+            Download Customer Report
           </button>
         </div>
       </Modal>

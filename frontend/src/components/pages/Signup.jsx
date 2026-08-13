@@ -62,7 +62,7 @@ export default function Signup() {
   return (
     <div className="min-h-screen bg-[#eeeae3] flex items-center justify-center px-4 py-5">
       <div className="w-full max-w-4xl overflow-hidden rounded-[22px] bg-[#faf9f6] shadow-2xl shadow-stone-400/20 grid lg:grid-cols-2">
-        {/* ================= LEFT SIDE ================= */}
+
 
         <div className="relative hidden overflow-hidden bg-stone-900 lg:flex">
           <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5" />
@@ -86,7 +86,7 @@ export default function Signup() {
               </div>
             </div>
 
-            {/* Illustration */}
+    
 
             <div className="flex justify-center">
               <div className="flex h-40 w-40 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]">
@@ -129,7 +129,7 @@ export default function Signup() {
           </div>
         </div>
 
-        {/* ================= RIGHT SIDE ================= */}
+     
 
         <div className="flex items-center justify-center px-6 py-7 sm:px-8">
           <div className="w-full max-w-sm">
@@ -173,7 +173,7 @@ export default function Signup() {
               </p>
             </div>
 
-            {/* ================= FORM ================= */}
+          
 
             <form onSubmit={handleSubmit} className="space-y-3">
               {/* Name */}
@@ -218,8 +218,7 @@ export default function Signup() {
                 </div>
               </div>
 
-              {/* Email */}
-
+       
               <div>
                 <label className="mb-1 block text-xs font-medium text-stone-700">
                   Email address
@@ -363,7 +362,7 @@ export default function Signup() {
                 </div>
               </div>
 
-              {/* Password */}
+            
 
               <div>
                 <label className="mb-1 block text-xs font-medium text-stone-700">
@@ -406,7 +405,6 @@ export default function Signup() {
                 </p>
               </div>
 
-              {/* Register */}
 
               <button
                 type="submit"
@@ -430,14 +428,14 @@ export default function Signup() {
                 {loading ? "Creating account..." : "Create account"}
               </button>
 
-              {/* Login */}
+         
 
               <div className="pt-2 text-center">
                 <p className="text-xs text-stone-500">
                   Already have an account?{" "}
                   <button
                     type="button"
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate("/login")}
                     className="font-medium text-stone-900 hover:underline"
                   >
                     Sign in
@@ -446,7 +444,7 @@ export default function Signup() {
               </div>
             </form>
 
-            {/* Footer */}
+       
 
             <div className="mt-4 flex items-center justify-center gap-1.5 border-t border-stone-200 pt-3 text-[10px] text-stone-400">
               <ShieldCheck size={12} />
