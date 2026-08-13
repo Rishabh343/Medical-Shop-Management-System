@@ -164,7 +164,7 @@ export default function Medicines() {
     if (!selectedDeleteItem) return;
     try {
       await deleteMedicine(selectedDeleteItem._id);
-      await getMedicine(currentPage);
+
       toast.success("Medicine Deleted Successfully");
       setDeleteModalOpen(false);
       setSelectedDeleteItem(null);
@@ -209,7 +209,6 @@ export default function Medicines() {
         toast.success("Medicine Added Successfully");
       }
 
-      await getMedicine(currentPage);
       closeModal();
     } catch (error) {
       console.log(error);

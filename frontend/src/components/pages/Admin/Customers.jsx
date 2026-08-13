@@ -142,7 +142,7 @@ export default function Customers() {
     }
   };
 
-  // --- HISTORY LOGIC ---
+
   const handleViewHistory = async (customerItem) => {
     setSelectedCustomer(customerItem);
     await getCustomerPurchaseHistory(customerItem._id);
