@@ -142,7 +142,6 @@ export default function Customers() {
     }
   };
 
-
   const handleViewHistory = async (customerItem) => {
     setSelectedCustomer(customerItem);
     await getCustomerPurchaseHistory(customerItem._id);
@@ -295,9 +294,16 @@ export default function Customers() {
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-stone-900 py-3 text-sm font-medium text-white transition hover:bg-stone-800 hover:shadow-md"
+            disabled={loading}
+            className="mt-2 w-full rounded-xl bg-stone-900 py-3 text-sm font-medium text-white transition hover:bg-stone-800 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {editing ? "Update Customer" : "Save Customer"}
+            {loading
+              ? editing
+                ? "Updating..."
+                : "Saving..."
+              : editing
+                ? "Update Customer"
+                : "Save Customer"}
           </button>
         </form>
       </Modal>

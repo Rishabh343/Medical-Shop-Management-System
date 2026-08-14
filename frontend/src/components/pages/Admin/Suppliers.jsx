@@ -260,11 +260,18 @@ export default function Suppliers() {
             />
           </div>
 
-          <button
+            <button
             type="submit"
-            className="w-full rounded-xl bg-stone-900 py-3 text-sm font-medium text-white transition hover:bg-stone-800 hover:shadow-md"
+            disabled={loading}
+            className="mt-2 w-full rounded-xl bg-stone-900 py-3 text-sm font-medium text-white transition hover:bg-stone-800 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {editing ? "Update Supplier" : "Save Supplier"}
+            {loading
+              ? editing
+                ? "Updating..."
+                : "Saving..."
+              : editing
+                ? "Update Supplier"
+                : "Save Supplier"}
           </button>
         </form>
       </Modal>

@@ -11,6 +11,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { UserContext } from "../context/UserContext";
+import toast from "react-hot-toast";
 
 
 
@@ -42,7 +43,7 @@ export default function Signup() {
     try {
       const response = await registerUser(formData);
 
-      alert(response.message);
+      toast.success(response.message);
 
       setFormData({
         name: "",
@@ -55,7 +56,7 @@ export default function Signup() {
 
       navigate("/");
     } catch (error) {
-      alert(error.response?.data?.message || "Registration Failed");
+      toast.error(error.response?.data?.message || "Registration Failed");
     }
   };
 

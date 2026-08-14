@@ -32,7 +32,7 @@ export default function Medicines() {
     searchMedicine,
     filterMedicine,
   } = useContext(MedicineContext);
-
+  const [loader, setLoader] = useState(false);
   const { supplier, getSupplier } = useContext(SupplierContext);
   const [category, setCategory] = useState("");
   const [company, setCompany] = useState("");
@@ -138,6 +138,7 @@ export default function Medicines() {
       if (supplier.length === 0) {
         await getSupplier();
       }
+
       const data = await getByMedicineId(id);
 
       setFormData({
@@ -184,6 +185,7 @@ export default function Medicines() {
     e.preventDefault();
 
     try {
+      setLoader(true);
       const data = new FormData();
 
       data.append("medicineName", formData.medicineName);
@@ -682,9 +684,16 @@ export default function Medicines() {
           </div>
           <button
             type="submit"
-            className="mt-2 w-full rounded-xl bg-stone-900 py-3 text-sm font-medium text-white transition hover:bg-stone-800 hover:shadow-md"
+            disabled={loading}
+            className="mt-2 w-full rounded-xl bg-stone-900 py-3 text-sm font-medium text-white transition hover:bg-stone-800 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {editing ? "Update Medicine" : "Save Medicine"}
+            {loading
+              ? editing
+                ? "Updating..."
+                : "Saving..."
+              : editing
+                ? "Update Medicine"
+                : "Save Medicine"}
           </button>
         </form>
       </Modal>
