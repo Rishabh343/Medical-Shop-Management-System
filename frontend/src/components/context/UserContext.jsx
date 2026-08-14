@@ -98,7 +98,7 @@ export default function UserProvider({ children }) {
     try {
       const response = await api.get(`/user/search?keyword=${keyword}`);
 
-      setUsers(response.data.user);
+      setUsers(response.data.data);
     } catch (error) {
       console.log(error.message);
       console.log("Axios search error check userContext");

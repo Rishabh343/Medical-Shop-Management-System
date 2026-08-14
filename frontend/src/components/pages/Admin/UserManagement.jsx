@@ -2,10 +2,10 @@ import React, { useContext, useEffect, useState } from "react";
 import { FaTrash, FaUsers } from "react-icons/fa";
 import { ArrowLeft } from "lucide-react";
 import Loader from "../../common/Loader";
-import { UserContext } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import DeleteModal from "../../common/DeleteModal";
+import { UserContext } from "../../context/UserContext";
 
 export default function UserManagement() {
   const navigate = useNavigate();
@@ -19,11 +19,9 @@ export default function UserManagement() {
       getUsers();
       return;
     }
-
     const timer = setTimeout(() => {
       searchUser(search);
     }, 500);
-
     return () => clearTimeout(timer);
   }, [search]);
   if (loading) {
