@@ -5,29 +5,23 @@ import billingModel from "../models/billingModel.js";
 
 export const getDashboard = async (req, res) => {
   try {
-    // ==========================
-    // 1. Basic Counts & Totals
-    // ==========================
     const totalMedicines = await medicineModel.countDocuments();
     const totalSuppliers = await supplierModel.countDocuments();
     const totalCustomers = await customerModel.countDocuments();
-    
+
     // totalSales = Total number of bills generated
-    const totalSales = await billingModel.countDocuments(); 
-    
-    // If you have a separate Purchase model, use it here. 
+    const totalSales = await billingModel.countDocuments();
+
+    // If you have a separate Purchase model, use it here.
     // For now, we will count total suppliers or set a fallback.
     const totalPurchases = await supplierModel.countDocuments(); // Update this if you have a purchaseModel
 
     // Calculate total stock across all medicines
     const stockAgg = await medicineModel.aggregate([
-      { $group: { _id: null, totalStock: { $sum: "$stockQuantity" } } }
+      { $group: { _id: null, totalStock: { $sum: "$stockQuantity" } } },
     ]);
     const totalStock = stockAgg.length > 0 ? stockAgg[0].totalStock : 0;
 
-    // ==========================
-    // 2. Revenue Calculations
-    // ==========================
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
     const endOfToday = new Date();
@@ -36,21 +30,23 @@ export const getDashboard = async (req, res) => {
     // Today's Revenue (Sum of finalAmount)
     const todaySalesData = await billingModel.aggregate([
       { $match: { createdAt: { $gte: startOfToday, $lte: endOfToday } } },
-      { $group: { _id: null, total: { $sum: "$finalAmount" } } }
+      { $group: { _id: null, total: { $sum: "$finalAmount" } } },
     ]);
     const todaySales = todaySalesData.length > 0 ? todaySalesData[0].total : 0;
 
     // Monthly Revenue (Sum of finalAmount)
-    const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const firstDayOfMonth = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      1,
+    );
     const monthlyRevenueData = await billingModel.aggregate([
       { $match: { createdAt: { $gte: firstDayOfMonth } } },
-      { $group: { _id: null, total: { $sum: "$finalAmount" } } }
+      { $group: { _id: null, total: { $sum: "$finalAmount" } } },
     ]);
-    const monthlyRevenue = monthlyRevenueData.length > 0 ? monthlyRevenueData[0].total : 0;
+    const monthlyRevenue =
+      monthlyRevenueData.length > 0 ? monthlyRevenueData[0].total : 0;
 
-    // ==========================
-    // 3. Alerts & Inventory Status
-    // ==========================
     // Low Stock (Stock <= Reorder Level)
     const lowStockMedicines = await medicineModel
       .find({ $expr: { $lte: ["$stockQuantity", "$reorderLevel"] } })
@@ -71,18 +67,15 @@ export const getDashboard = async (req, res) => {
       .select("medicineName expiryDate stockQuantity company category")
       .limit(10);
 
-    // ==========================
-    // 4. Charts Data
-    // ==========================
     // Monthly Sales Chart
     const monthlySales = await billingModel.aggregate([
       {
         $group: {
           _id: { month: { $month: "$createdAt" } },
-          totalSales: { $sum: "$finalAmount" }
-        }
+          totalSales: { $sum: "$finalAmount" },
+        },
       },
-      { $sort: { "_id.month": 1 } }
+      { $sort: { "_id.month": 1 } },
     ]);
 
     // Category Wise Sales (Using correct "medicinemodels" collection name)
@@ -93,30 +86,27 @@ export const getDashboard = async (req, res) => {
           from: "medicinemodels", // Correct Mongoose collection name
           localField: "items.medicine",
           foreignField: "_id",
-          as: "medicine"
-        }
+          as: "medicine",
+        },
       },
       { $unwind: "$medicine" },
       {
         $group: {
           _id: "$medicine.category",
-          totalSales: { $sum: "$items.totalPrice" }
-        }
+          totalSales: { $sum: "$items.totalPrice" },
+        },
       },
-      { $sort: { totalSales: -1 } }
+      { $sort: { totalSales: -1 } },
     ]);
 
-    // ==========================
-    // 5. Recent Activity & Top Selling
-    // ==========================
     // Top Selling Medicines (Using correct "medicinemodels" collection name)
     const topSellingMedicines = await billingModel.aggregate([
       { $unwind: "$items" },
       {
         $group: {
           _id: "$items.medicine",
-          totalQuantity: { $sum: "$items.quantity" }
-        }
+          totalQuantity: { $sum: "$items.quantity" },
+        },
       },
       { $sort: { totalQuantity: -1 } },
       { $limit: 5 },
@@ -125,26 +115,26 @@ export const getDashboard = async (req, res) => {
           from: "medicinemodels", // Correct Mongoose collection name
           localField: "_id",
           foreignField: "_id",
-          as: "medicine"
-        }
+          as: "medicine",
+        },
       },
       { $unwind: "$medicine" },
       {
         $project: {
           _id: 0,
           medicineName: "$medicine.medicineName",
-          quantitySold: "$totalQuantity"
-        }
-      }
+          quantitySold: "$totalQuantity",
+        },
+      },
     ]);
 
     // Recent 5 Sales (Invoices)
     const recentSales = await billingModel
       .find()
       .sort({ createdAt: -1 })
-      .select("billNumber finalAmount paymentMethod createdAt")
+      .select("billNumber finalAmount paymentMethod createdAt ")
       .populate("customer", "customerName")
-      .limit(5);
+      .limit(7);
 
     // Recent 5 Medicines added (Acting as recent purchases)
     const recentPurchases = await medicineModel
@@ -154,12 +144,9 @@ export const getDashboard = async (req, res) => {
       .populate("supplier", "supplierName")
       .limit(5);
 
-    // ==========================
-    // 6. Send Response
-    // ==========================
     res.status(200).json({
       success: true,
-      
+
       // Top Stat Cards
       totalMedicines,
       totalSuppliers,
@@ -178,13 +165,12 @@ export const getDashboard = async (req, res) => {
       // Charts
       monthlySales,
       categorySales,
-      
+
       // Tables / Lists
       recentPurchases,
       recentSales,
-      topSellingMedicines
+      topSellingMedicines,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,

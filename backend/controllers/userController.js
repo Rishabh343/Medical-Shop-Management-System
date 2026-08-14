@@ -8,7 +8,7 @@ export const Register = async (req, res) => {
   try {
     const { name, email, role, age, phone, password } = req.body;
 
-    // Age validation
+   
     if (age < 18) {
       return res.status(400).json({
         status: false,
