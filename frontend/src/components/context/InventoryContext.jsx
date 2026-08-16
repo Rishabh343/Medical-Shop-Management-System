@@ -9,7 +9,11 @@ export default function InventoryProvider({ children }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [stockMovement, setStockMovement] = useState([]);
-  // \Get All Inventory
+  const [stockSummary, setStockSummary] = useState({
+    currentStock: 0,
+    totalStockIn: 0,
+    totalStockOut: 0,
+  });
   const getInventory = async (page = 1) => {
     try {
       setLoading(true);
@@ -157,7 +161,31 @@ export default function InventoryProvider({ children }) {
       setLoading(false);
     }
   };
+  const getStockMovementHistory = async (id) => {
+    try {
+      setLoading(true);
 
+      const response = await api.get(`/inventory/stock-history/${id}`);
+      const data = response.data.data;
+
+      setStockMovement(data.history || []);
+      setStockSummary({
+        currentStock: data.currentStock || 0,
+        totalStockIn: data.totalStockIn || 0,
+        totalStockOut: data.totalStockOut || 0,
+      });
+    } catch (error) {
+      console.log(error);
+      setStockMovement([]);
+      setStockSummary({
+        currentStock: 0,
+        totalStockIn: 0,
+        totalStockOut: 0,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <InventoryContext.Provider
       value={{
@@ -173,6 +201,8 @@ export default function InventoryProvider({ children }) {
         getLowStock,
         getOutOfStock,
         searchInventory,
+        stockSummary,
+        getStockMovementHistory,
         getExpiredInventory,
         getNearExpiryInventory,
         getStockMovement,

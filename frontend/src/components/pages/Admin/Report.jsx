@@ -42,9 +42,6 @@ export default function Report() {
       case "purchase":
         await getPurchaseReport();
         break;
-      case "best-selling":
-        await getBestSellingReport();
-        break;
       case "low-stock":
         await getLowStockReport();
         break;
@@ -104,25 +101,23 @@ export default function Report() {
     });
   }, [reports]);
 
-  // --- EXPORT TO PDF ---
+
   const handleExportPDF = () => {
     if (formattedReports.length === 0) {
       alert("No data to export!");
       return;
     }
 
-    // Use landscape mode because tables are usually wide
     const doc = new jsPDF("landscape");
 
-    // Extract headers and rows
+
     const tableColumn = Object.keys(formattedReports[0]);
     const tableRows = formattedReports.map((item) => Object.values(item));
 
-    // Add title
+
     doc.setFontSize(14);
     doc.text(`Pharmacy Report: ${reportType.toUpperCase()}`, 14, 15);
 
-    // Generate table
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
@@ -134,7 +129,7 @@ export default function Report() {
     doc.save(`${reportType || "Pharmacy"}_Report.pdf`);
   };
 
-  // --- EXPORT TO EXCEL ---
+
   const handleExportExcel = () => {
     if (formattedReports.length === 0) {
       alert("No data to export!");

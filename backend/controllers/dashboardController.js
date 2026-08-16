@@ -134,7 +134,7 @@ export const getDashboard = async (req, res) => {
       .sort({ createdAt: -1 })
       .select("billNumber finalAmount paymentMethod createdAt ")
       .populate("customer", "customerName")
-      .limit(7);
+      .limit(5);
 
     // Recent 5 Medicines added (Acting as recent purchases)
     const recentPurchases = await medicineModel

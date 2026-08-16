@@ -55,6 +55,7 @@ export default function Medicines() {
     company: "",
     batchNumber: "",
     expiryDate: "",
+    reorderLevel:"",
     purchasePrice: "",
     sellingPrice: "",
     stockQuantity: "",
@@ -147,6 +148,7 @@ export default function Medicines() {
         category: data.category || "",
         company: data.company || "",
         batchNumber: data.batchNumber || "",
+        reorderLevel: data.reorderLevel || "",
         expiryDate: data.expiryDate ? data.expiryDate.substring(0, 10) : "",
         purchasePrice: data.purchasePrice || "",
         sellingPrice: data.sellingPrice || "",
@@ -192,6 +194,7 @@ export default function Medicines() {
       data.append("genericName", formData.genericName);
       data.append("category", formData.category);
       data.append("company", formData.company);
+      data.append("reorderLevel", formData.reorderLevel);
       data.append("batchNumber", formData.batchNumber);
       data.append("expiryDate", formData.expiryDate);
       data.append("purchasePrice", formData.purchasePrice);
@@ -565,7 +568,19 @@ export default function Medicines() {
                 required
               />
             </div>
-
+ <div>
+              <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                ReorderLevel
+              </label>
+              <input
+                type="text"
+                name="reorderLevel"
+                value={formData.reorderLevel}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                required
+              />
+            </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-stone-700">
                 Company
@@ -635,21 +650,6 @@ export default function Medicines() {
                 required
               />
             </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-stone-700">
-                Stock Quantity
-              </label>
-              <input
-                type="number"
-                name="stockQuantity"
-                value={formData.stockQuantity}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
-                required
-              />
-            </div>
-
             <div>
               <label className="mb-1.5 block text-sm font-medium text-stone-700">
                 Supplier
@@ -669,19 +669,20 @@ export default function Medicines() {
                 ))}
               </select>
             </div>
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-stone-700">
-              Medicine Image
-            </label>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                Medicine Image
+              </label>
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setMedicineImage(e.target.files[0])}
-              className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-700"
-            />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setMedicineImage(e.target.files[0])}
+                className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-700"
+              />
+            </div>
           </div>
+
           <button
             type="submit"
             disabled={loading}
@@ -877,7 +878,7 @@ export default function Medicines() {
           </table>
         </div>
 
-        {!isSearching && totalPages > 1 && (
+        {!isSearching && !isFiltering && totalPages > 1 && (
           <div className="border-t border-stone-200 px-5 py-4">
             <Pagination
               currentPage={currentPage}

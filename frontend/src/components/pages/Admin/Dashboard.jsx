@@ -291,12 +291,6 @@ export default function Dashboard() {
                 path: "/admin/customers",
               },
               {
-                title: "Suppliers",
-                description: "Manage suppliers",
-                icon: FaTruck,
-                path: "/admin/suppliers",
-              },
-              {
                 title: "Reports",
                 description: "View reports",
                 icon: FaChartBar,
@@ -308,12 +302,7 @@ export default function Dashboard() {
                 icon: FaUserCog,
                 path: "/admin/user",
               },
-              {
-                title: "Dashboard",
-                description: "Overview",
-                icon: FaChartLine,
-                path: "/admin/dashboard",
-              },
+            
             ].map((action) => {
               const Icon = action.icon;
 

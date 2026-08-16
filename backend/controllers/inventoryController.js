@@ -1,5 +1,8 @@
+import mongoose from "mongoose";
 import billingModel from "../models/billingModel.js";
 import medicineModel from "../models/medicineModel.js";
+
+import stockMovement from "../models/stockMovement.js";
 
 export const getAllInventory = async (req, res) => {
   try {
@@ -32,41 +35,10 @@ export const getAllInventory = async (req, res) => {
 
 export const getStockMovement = async (req, res) => {
   try {
-    // 1. Fetch all billing records to generate "OUT" history (Sales)
-    const sales = await billingModel.find().sort({ createdAt: -1 });
-    let stockHistory = [];
-
-    // Extract individual items from all bills
-    sales.forEach((bill) => {
-      bill.items.forEach((item) => {
-        stockHistory.push({
-          _id: `${bill._id}-${item.medicine}`,
-          inventory: item.medicine,
-          type: "OUT",
-          quantity: item.quantity,
-          remarks: `Sold - Bill #${bill.billNumber}`,
-          createdAt: bill.createdAt,
-        });
-      });
-    });
-
-    // 2. Fetch all medicines to act as "IN" / stock updates
-    const medicines = await medicineModel.find();
-
-    medicines.forEach((med) => {
-      stockHistory.push({
-        _id: `${med._id}-init`,
-        inventory: med._id,
-        type: "IN",
-        // Fallback to current stock if no dedicated movement DB exists
-        quantity: med.stockQuantity,
-        remarks: "Stock Added / Adjusted",
-        createdAt: med.updatedAt || med.createdAt,
-      });
-    });
-
-    // 3. Sort the combined history from Newest to Oldest
-    stockHistory.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const stockHistory = await stockMovement
+      .find()
+      .populate("medicine", "medicineName company")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -80,6 +52,7 @@ export const getStockMovement = async (req, res) => {
     });
   }
 };
+
 export const searchInventory = async (req, res) => {
   try {
     const { keyword } = req.query;
@@ -104,6 +77,7 @@ export const searchInventory = async (req, res) => {
     });
   }
 };
+
 export const getInventoryByMedicine = async (req, res) => {
   try {
     const medicine = await medicineModel
@@ -132,8 +106,9 @@ export const getInventoryByMedicine = async (req, res) => {
 export const increaseStock = async (req, res) => {
   try {
     const { quantity } = req.body;
+    const addedQuantity = Number(quantity);
 
-    if (!quantity || quantity <= 0) {
+    if (!quantity || Number.isNaN(addedQuantity) || addedQuantity <= 0) {
       return res.status(400).json({
         status: false,
         message: "Enter a valid quantity",
@@ -149,9 +124,41 @@ export const increaseStock = async (req, res) => {
       });
     }
 
-    medicine.stockQuantity += Number(quantity);
+    const session = await mongoose.startSession();
 
-    await medicine.save();
+    try {
+      await session.withTransaction(async () => {
+        const updatedMedicine = await medicineModel
+          .findByIdAndUpdate(
+            req.params.id,
+            {
+              $inc: {
+                stockQuantity: addedQuantity,
+                stockIn: addedQuantity,
+              },
+            },
+            { new: true, session },
+          )
+          .populate("supplier", "supplierName");
+
+        await stockMovement.create(
+          [
+            {
+              medicine: medicine._id,
+              type: "IN",
+              quantity: addedQuantity,
+              remarks: "Stock Added",
+            },
+          ],
+          { session },
+        );
+
+        medicine.stockQuantity = updatedMedicine.stockQuantity;
+        medicine.stockIn = updatedMedicine.stockIn;
+      });
+    } finally {
+      session.endSession();
+    }
 
     res.status(200).json({
       status: true,
@@ -169,8 +176,9 @@ export const increaseStock = async (req, res) => {
 export const adjustStock = async (req, res) => {
   try {
     const { quantity } = req.body;
+    const stockOutQuantity = Number(quantity);
 
-    if (!quantity || quantity <= 0) {
+    if (!quantity || Number.isNaN(stockOutQuantity) || stockOutQuantity <= 0) {
       return res.status(400).json({
         status: false,
         message: "Enter a valid quantity",
@@ -186,16 +194,48 @@ export const adjustStock = async (req, res) => {
       });
     }
 
-    if (medicine.stockQuantity < quantity) {
+    if (medicine.stockQuantity < stockOutQuantity) {
       return res.status(400).json({
         status: false,
         message: "Insufficient stock",
       });
     }
 
-    medicine.stockQuantity -= Number(quantity);
+    const session = await mongoose.startSession();
 
-    await medicine.save();
+    try {
+      await session.withTransaction(async () => {
+        const updatedMedicine = await medicineModel
+          .findByIdAndUpdate(
+            req.params.id,
+            {
+              $inc: {
+                stockQuantity: -stockOutQuantity,
+                stockOut: stockOutQuantity,
+              },
+            },
+            { new: true, session },
+          )
+          .populate("supplier", "supplierName");
+
+        await stockMovement.create(
+          [
+            {
+              medicine: medicine._id,
+              type: "OUT",
+              quantity: stockOutQuantity,
+              remarks: "Stock Adjustment",
+            },
+          ],
+          { session },
+        );
+
+        medicine.stockQuantity = updatedMedicine.stockQuantity;
+        medicine.stockOut = updatedMedicine.stockOut;
+      });
+    } finally {
+      session.endSession();
+    }
 
     res.status(200).json({
       status: true,
@@ -214,6 +254,7 @@ export const getLowStock = async (req, res) => {
   try {
     const medicines = await medicineModel
       .find({ $expr: { $lte: ["$stockQuantity", "$reorderLevel"] } })
+      .select("-medicineImage")
       .populate("supplier", "supplierName");
 
     res.status(200).json({
@@ -235,6 +276,7 @@ export const getOutOfStock = async (req, res) => {
       .find({
         stockQuantity: 0,
       })
+      .select("-medicineImage")
       .populate("supplier", "supplierName");
 
     res.status(200).json({
@@ -256,6 +298,7 @@ export const getExpiredInventory = async (req, res) => {
       .find({
         expiryDate: { $lt: new Date() },
       })
+      .select("-medicineImage")
       .populate("supplier", "supplierName");
 
     res.status(200).json({
@@ -274,9 +317,9 @@ export const getExpiredInventory = async (req, res) => {
 export const getNearExpiryInventory = async (req, res) => {
   try {
     const today = new Date();
-
     const next30Days = new Date();
     next30Days.setDate(today.getDate() + 30);
+
     const medicines = await medicineModel
       .find({
         expiryDate: {
@@ -284,6 +327,7 @@ export const getNearExpiryInventory = async (req, res) => {
           $lte: next30Days,
         },
       })
+      .select("-medicineImage")
       .populate("supplier", "supplierName");
 
     res.status(200).json({
@@ -294,6 +338,39 @@ export const getNearExpiryInventory = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getStockHistory = async (req, res) => {
+  try {
+    const medicine = await medicineModel.findById(req.params.id);
+
+    if (!medicine) {
+      return res.status(404).json({
+        status: false,
+        message: "Medicine not found",
+      });
+    }
+
+    const history = await stockMovement
+      .find({ medicine: req.params.id })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: history.length,
+      data: {
+        currentStock: medicine.stockQuantity,
+        totalStockIn: medicine.stockIn,
+        totalStockOut: medicine.stockOut,
+        history,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
       message: error.message,
     });
   }

@@ -1,6 +1,9 @@
+import mongoose from "mongoose";
 import billingModel from "../models/billingModel.js";
 import customerModel from "../models/customerModel.js";
 import medicineModel from "../models/medicineModel.js";
+import stockMovementModel from "../models/stockMovement.js";
+import stockMovement from "../models/stockMovement.js";
 
 export const createBill = async (req, res) => {
   try {
@@ -11,7 +14,6 @@ export const createBill = async (req, res) => {
       rewardPointsToRedeem = 0,
     } = req.body;
 
-    // Find Customer
     const customer = await customerModel.findById(customerId);
 
     if (!customer) {
@@ -24,14 +26,13 @@ export const createBill = async (req, res) => {
     let totalAmount = 0;
     const items = [];
 
-    // Validate Medicines & Calculate Total
     for (const item of medicines) {
       const medicine = await medicineModel.findById(item.medicineId);
 
       if (!medicine) {
         return res.status(404).json({
           status: false,
-          message: `${item.medicineId} not found`,
+          message: "Medicine not found",
         });
       }
 
@@ -42,42 +43,46 @@ export const createBill = async (req, res) => {
         });
       }
 
-      // Reduce Stock
-      medicine.stockQuantity -= item.quantity;
+      const quantity = Number(item.quantity);
+
+      medicine.stockQuantity -= quantity;
+      medicine.stockOut += quantity;
+
       await medicine.save();
 
-      const totalPrice = medicine.sellingPrice * item.quantity;
+      const totalPrice = medicine.sellingPrice * quantity;
 
       totalAmount += totalPrice;
 
       items.push({
         medicine: medicine._id,
-        quantity: item.quantity,
+        quantity,
         sellingPrice: medicine.sellingPrice,
         totalPrice,
       });
     }
-    // Validate Reward Points
+
     if (rewardPointsToRedeem > customer.rewardPoints) {
       return res.status(400).json({
         status: false,
         message: "Insufficient Reward Points",
       });
     }
-    // Reward Discount
-    let discount = rewardPointsToRedeem;
+
+    let discount = Number(rewardPointsToRedeem);
 
     if (discount > totalAmount) {
       discount = totalAmount;
     }
-    // Final Payable Amount
+
     const finalAmount = totalAmount - discount;
-    // Earn Reward Points
+
     const earnedPoints = Math.floor(finalAmount / 100);
-    // Invoice Number
+
     const count = await billingModel.countDocuments();
+
     const billNumber = `INV-${String(count + 1).padStart(5, "0")}`;
-    // Create Bill
+
     const bill = await billingModel.create({
       billNumber,
       customer: customerId,
@@ -91,12 +96,25 @@ export const createBill = async (req, res) => {
       rewardPointsRedeemed: rewardPointsToRedeem,
     });
 
-    // Update Customer
+    for (const item of items) {
+      await stockMovement.create({
+        medicine: item.medicine,
+        type: "OUT",
+        quantity: item.quantity,
+        remarks: "Sale",
+        billNumber: bill.billNumber,
+      });
+    }
+
     customer.rewardPoints =
-      customer.rewardPoints - rewardPointsToRedeem + earnedPoints;
+      customer.rewardPoints -
+      rewardPointsToRedeem +
+      earnedPoints;
+
     customer.lifetimePurchase += finalAmount;
     customer.totalOrders += 1;
     customer.lastPurchase = new Date();
+
     await customer.save();
 
     res.status(201).json({

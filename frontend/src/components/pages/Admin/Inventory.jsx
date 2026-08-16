@@ -23,6 +23,8 @@ export default function Inventory() {
     getExpiredInventory,
     getNearExpiryInventory,
     stockMovement,
+    stockSummary,
+    getStockMovementHistory,
     getStockMovement,
   } = useContext(InventoryContext);
 
@@ -92,7 +94,7 @@ export default function Inventory() {
   const handleViewHistory = async (item) => {
     setSelectedItem(item);
     setHistoryModalOpen(true);
-    await getStockMovement();
+    await getStockMovementHistory(item._id);
   };
 
   // Filter the global stock movements for the currently selected inventory item
@@ -252,80 +254,170 @@ export default function Inventory() {
         isOpen={historyModalOpen}
         onClose={() => setHistoryModalOpen(false)}
         title={`Stock History: ${selectedItem?.medicineName || ""}`}
+        size="lg"
       >
         <div className="space-y-4">
           {loading && stockMovement.length === 0 ? (
             <div className="flex justify-center py-8">
               <Loader />
             </div>
-          ) : currentItemHistory.length > 0 ? (
-            <div className="max-h-80 overflow-y-auto rounded-xl border border-stone-200">
-              <table className="w-full text-left text-sm">
-                <thead className="sticky top-0 border-b border-stone-200 bg-stone-50">
-                  <tr>
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
-                      Date
-                    </th>
-
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
-                      Type
-                    </th>
-
-                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
-                      Qty
-                    </th>
-
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-stone-500">
-                      Remarks
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody className="divide-y divide-stone-100">
-                  {currentItemHistory.map((mov) => (
-                    <tr key={mov._id} className="transition hover:bg-stone-50">
-                      <td className="px-4 py-3 text-sm text-stone-600">
-                        {new Date(mov.createdAt).toLocaleDateString("en-IN", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </td>
-
-                      <td className="px-4 py-3">
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                            mov.type === "IN" || mov.movementType === "IN"
-                              ? "bg-stone-100 text-stone-700"
-                              : "bg-stone-900 text-white"
-                          }`}
-                        >
-                          {mov.type || mov.movementType || "N/A"}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3 text-center text-sm font-semibold text-stone-800">
-                        {mov.quantity}
-                      </td>
-
-                      <td className="px-4 py-3 text-right text-xs text-stone-500">
-                        {mov.remarks || mov.reason || "-"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
           ) : (
-            <div className="rounded-xl bg-stone-50 py-10 text-center">
-              <p className="text-sm font-medium text-stone-700">
-                No stock movement history
-              </p>
+            <>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-xl border border-stone-200 bg-white p-3">
+                  <p className="text-[9px] font-medium uppercase tracking-wider text-stone-400">
+                    Current Stock
+                  </p>
 
-              <p className="mt-1 text-xs text-stone-400">
-                There are no recorded movements for this medicine.
-              </p>
-            </div>
+                  <p className="mt-1 text-xl font-semibold text-stone-900">
+                    {stockSummary.currentStock}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-stone-200 bg-white p-3">
+                  <p className="text-[9px] font-medium uppercase tracking-wider text-stone-400">
+                    Total Stock In
+                  </p>
+
+                  <p className="mt-1 text-xl font-semibold text-emerald-700">
+                    {stockSummary.totalStockIn}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-stone-200 bg-white p-3">
+                  <p className="text-[9px] font-medium uppercase tracking-wider text-stone-400">
+                    Total Stock Out
+                  </p>
+
+                  <p className="mt-1 text-xl font-semibold text-red-600">
+                    {stockSummary.totalStockOut}
+                  </p>
+                </div>
+              </div>
+
+              {stockMovement.length > 0 ? (
+                <div className="max-h-80 overflow-y-auto rounded-xl border border-stone-200">
+                  <table className="w-full text-left text-sm">
+                    <thead className="sticky top-0 z-10 border-b border-stone-200 bg-stone-50">
+                      <tr>
+                        <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                          Date
+                        </th>
+
+                        <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                          Type
+                        </th>
+
+                        <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
+                          Qty
+                        </th>
+
+                        <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                          Invoice
+                        </th>
+
+                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-stone-500">
+                          Remarks
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody className="divide-y divide-stone-100">
+                      {stockMovement.map((mov) => {
+                        const isStockIn = mov.type === "IN";
+
+                        return (
+                          <tr
+                            key={mov._id}
+                            className="transition hover:bg-stone-50"
+                          >
+                            <td className="px-4 py-3 text-sm text-stone-600">
+                              <div>
+                                {new Date(mov.createdAt).toLocaleDateString(
+                                  "en-IN",
+                                  {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  },
+                                )}
+
+                                <p className="mt-0.5 text-[10px] text-stone-400">
+                                  {new Date(mov.createdAt).toLocaleTimeString(
+                                    "en-IN",
+                                    {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    },
+                                  )}
+                                </p>
+                              </div>
+                            </td>
+
+                            <td className="px-4 py-3">
+                              <span
+                                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                  isStockIn
+                                    ? "bg-emerald-50 text-emerald-700"
+                                    : "bg-red-50 text-red-600"
+                                }`}
+                              >
+                                {isStockIn ? "IN" : "OUT"}
+                              </span>
+                            </td>
+
+                            <td
+                              className={`px-4 py-3 text-center text-sm font-semibold ${
+                                isStockIn ? "text-emerald-700" : "text-red-600"
+                              }`}
+                            >
+                              {isStockIn ? "+" : "-"}
+                              {mov.quantity}
+
+                              <span className="ml-1 text-[10px] font-normal text-stone-400">
+                                units
+                              </span>
+                            </td>
+
+                            <td className="px-4 py-3">
+                              {mov.billNumber ? (
+                                <div>
+                                  <p className="text-sm font-semibold text-stone-700">
+                                    {mov.billNumber}
+                                  </p>
+
+                                  <p className="text-[10px] text-stone-400">
+                                    Invoice
+                                  </p>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-stone-400">
+                                  —
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="px-4 py-3 text-right text-xs text-stone-500">
+                              {mov.remarks || "-"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="rounded-xl bg-stone-50 py-10 text-center">
+                  <p className="text-sm font-medium text-stone-700">
+                    No stock movement history
+                  </p>
+
+                  <p className="mt-1 text-xs text-stone-400">
+                    There are no recorded movements for this medicine.
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </Modal>

@@ -7,7 +7,7 @@ import {
   FaUsers,
   FaChartLine,
   FaTruck,
-   FaCheckCircle
+  FaCheckCircle,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -99,13 +99,7 @@ export default function Landing() {
               onClick={() => scrollToSection("pricing")}
               className="text-sm font-medium text-stone-500 transition hover:text-stone-900"
             >
-              Pricing
-            </button>
-            <button
-              onClick={() => scrollToSection("stats")}
-              className="text-sm font-medium text-stone-500 transition hover:text-stone-900"
-            >
-              About Us
+              About
             </button>
             <button
               onClick={() => scrollToSection("contact")}
@@ -132,11 +126,13 @@ export default function Landing() {
         </div>
       </header>
 
-      <section id="home" className="relative overflow-hidden border-b border-stone-200 bg-[#faf9f6]">
+      <section
+        id="home"
+        className="relative overflow-hidden border-b border-stone-200 bg-[#faf9f6]"
+      >
         <div className="mx-auto max-w-7xl px-5 pb-20 pt-12 sm:px-8 sm:pb-2 sm:pt-4 lg:px-2 lg:pb-20 lg:pt-1">
           <div className="grid items-center gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-10">
             <div className="relative z-10 max-w-xl">
-
               <h1 className="mt-5 font-serif text-5xl font-semibold leading-[0.98] tracking-[-0.04em] text-stone-900 sm:text-6xl lg:text-[68px] xl:text-[76px]">
                 Smart Pharmacy
                 <br />
@@ -152,14 +148,14 @@ export default function Landing() {
 
               <p className="mt-7 max-w-lg text-base leading-7 text-stone-500 sm:text-lg sm:leading-8">
                 MediStock helps you manage medicines, inventory, sales,
-                purchases, customers and suppliers — all in one place.
-                Save time, reduce errors and grow your pharmacy with
-                smarter operations.
+                purchases, customers and suppliers — all in one place. Save
+                time, reduce errors and grow your pharmacy with smarter
+                operations.
               </p>
 
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <button
-                  onClick={() => navigate("/signup")}
+                  onClick={() => navigate("/login")}
                   className="inline-flex items-center gap-3 rounded-xl bg-stone-900 px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800 hover:shadow-lg"
                 >
                   Get Started Free
@@ -208,59 +204,16 @@ export default function Landing() {
                     className="block h-auto w-full"
                   />
                 </div>
-
-                <div className="absolute -bottom-6 -left-5 hidden w-48 rounded-2xl border border-stone-200 bg-[#faf9f6]/95 p-4 shadow-xl backdrop-blur sm:block">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-[9px] font-medium uppercase tracking-wider text-stone-400">
-                        Monthly Revenue
-                      </p>
-                      <p className="mt-1 text-lg font-semibold text-stone-900">
-                        ₹12,792
-                      </p>
-                    </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f0e4d5] text-[#9a744c]">
-                      ₹
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-center gap-2">
-                    <span className="text-[10px] font-medium text-emerald-600">
-                      ↑ 18.7%
-                    </span>
-                    <span className="text-[10px] text-stone-400">
-                      from last month
-                    </span>
-                  </div>
-                </div>
-
-                <div className="absolute -right-4 -top-6 hidden w-44 rounded-2xl border border-stone-200 bg-white p-4 shadow-xl sm:block">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f0e4d5] text-[#9a744c]">
-                      +
-                    </div>
-                    <div>
-                      <p className="text-[9px] uppercase tracking-wider text-stone-400">
-                        Inventory
-                      </p>
-                      <p className="mt-0.5 text-sm font-semibold text-stone-900">
-                        5,468 Units
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-stone-100">
-                    <div className="h-full w-[78%] rounded-full bg-[#b9946c]" />
-                  </div>
-                  <p className="mt-2 text-[9px] text-stone-400">
-                    Stock levels looking healthy
-                  </p>
-                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="features" className="border-t border-stone-100 bg-white px-6 py-20 lg:px-8">
+      <section
+        id="features"
+        className="border-t border-stone-100 bg-white px-6 py-20 lg:px-8"
+      >
         <div className="mx-auto max-w-7xl">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#a0784f]">
@@ -315,7 +268,10 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="pricing" className="border-t border-stone-100 bg-stone-900 px-6 py-20 text-white lg:px-8">
+      <section
+        id="pricing"
+        className="border-t border-stone-100 bg-stone-900 px-6 py-20 text-white lg:px-8"
+      >
         <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c7a986]">
             Get Started Today
@@ -361,7 +317,10 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer id="contact" className="bg-stone-900 px-6 pb-8 text-stone-400 lg:px-8">
+      <footer
+        id="contact"
+        className="bg-stone-900 px-6 pb-8 text-stone-400 lg:px-8"
+      >
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-5 border-t border-stone-800 pt-7 text-xs md:flex-row">
           <p>© 2026 MediStock. All rights reserved.</p>
           <div className="flex gap-6">
@@ -379,12 +338,6 @@ export default function Landing() {
             </button>
             <button
               onClick={() => scrollToSection("pricing")}
-              className="transition hover:text-white"
-            >
-              Pricing
-            </button>
-            <button
-              onClick={() => scrollToSection("stats")}
               className="transition hover:text-white"
             >
               About
