@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   FaPills,
@@ -14,8 +14,10 @@ import {
   FaTimes,
   FaChevronDown,
 } from "react-icons/fa";
+import { UserContext } from "../context/UserContext";
 
 export default function NavBar() {
+  const { logoutUser } = useContext(UserContext);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const role = localStorage.getItem("role")?.toLowerCase();
@@ -34,12 +36,17 @@ export default function NavBar() {
   const pharmacistMenu = [
     { name: "Medicines", path: "/pharmacist/medicine", icon: <FaPills /> },
     { name: "Customers", path: "/pharmacist/customers", icon: <FaUsers /> },
-    { name: "Billing", path: "/pharmacist/billing", icon: <FaFileInvoiceDollar /> },
+    {
+      name: "Billing",
+      path: "/pharmacist/billing",
+      icon: <FaFileInvoiceDollar />,
+    },
   ];
 
   const menu = role === "admin" ? adminMenu : pharmacistMenu;
 
   const handleLogout = () => {
+    logoutUser();
     localStorage.clear();
     navigate("/");
   };
@@ -110,9 +117,7 @@ export default function NavBar() {
                           <>
                             <span
                               className={
-                                isActive
-                                  ? "text-white"
-                                  : "text-stone-400"
+                                isActive ? "text-white" : "text-stone-400"
                               }
                             >
                               {React.cloneElement(item.icon, { size: 14 })}
@@ -147,4 +152,4 @@ export default function NavBar() {
       </div>
     </nav>
   );
-} 
+}

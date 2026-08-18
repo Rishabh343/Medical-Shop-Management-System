@@ -6,7 +6,5 @@ import { auth } from "../middlewares/auth.js";
 import { isAdmin } from "../middlewares/isAdmin.js";
 
 const dashboardRouter = express.Router();
-
 dashboardRouter.get("/",auth,isAdmin, getDashboard);
-
 export default dashboardRouter;
