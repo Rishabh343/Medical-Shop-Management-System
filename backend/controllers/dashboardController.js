@@ -79,7 +79,6 @@ export const getDashboard = async (req, res) => {
       .select("medicineName expiryDate stockQuantity company batchNumber")
       .limit(10);
 
-  
     const next30Days = new Date();
     next30Days.setDate(next30Days.getDate() + 30);
     const expiringMedicines = await medicineModel
@@ -101,7 +100,7 @@ export const getDashboard = async (req, res) => {
       { $unwind: "$items" },
       {
         $lookup: {
-          from: "medicinemodels", 
+          from: "medicinemodels",
           localField: "items.medicine",
           foreignField: "_id",
           as: "medicine",
@@ -129,7 +128,7 @@ export const getDashboard = async (req, res) => {
       { $limit: 5 },
       {
         $lookup: {
-          from: "medicinemodels", 
+          from: "medicinemodels",
           localField: "_id",
           foreignField: "_id",
           as: "medicine",
@@ -177,6 +176,14 @@ export const getDashboard = async (req, res) => {
       recentPurchases,
       recentSales,
       topSellingMedicines,
+      totalMedicines,
+      totalSuppliers,
+      totalCustomers,
+      totalPurchases,
+      totalSales,
+      totalStock,
+      todaySales,
+      monthlyRevenue,
     });
   } catch (error) {
     res.status(500).json({

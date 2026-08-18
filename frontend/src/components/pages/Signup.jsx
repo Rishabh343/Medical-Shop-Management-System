@@ -358,7 +358,7 @@ export default function Signup() {
                   >
                     <option value="Pharmacist">Pharmacist</option>
 
-                    <option value="Admin">Admin</option>
+                   
                   </select>
                 </div>
               </div>

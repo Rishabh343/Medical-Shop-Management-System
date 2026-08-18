@@ -70,48 +70,56 @@ export default function Dashboard() {
       value: dashboard.totalMedicines,
       icon: <FaPills />,
       color: "bg-blue-500",
+       path: "/admin/medicine",
     },
     {
       title: "Total Stock Units",
       value: dashboard.totalStock || 0,
       icon: <FaBoxOpen />,
       color: "bg-cyan-500",
+       path: "/admin/inventory",
     },
     {
       title: "Today's Sales",
       value: `₹${dashboard.todaySales}`,
       icon: <FaFileInvoiceDollar />,
       color: "bg-emerald-500",
+       path: "/admin/reports",
     },
     {
       title: "Monthly Revenue",
       value: `₹${dashboard.monthlyRevenue}`,
       icon: <FaRupeeSign />,
       color: "bg-indigo-500",
+       path: "/admin/reports",
     },
     {
       title: "Total Customers",
       value: dashboard.totalCustomers,
       icon: <FaUsers />,
       color: "bg-violet-500",
+       path: "/admin/customers",
     },
     {
       title: "Total Suppliers",
       value: dashboard.totalSuppliers,
       icon: <FaTruck />,
       color: "bg-fuchsia-500",
+       path: "/admin/suppliers",
     },
     {
       title: "Low Stock Alerts",
       value: dashboard.lowStockMedicines?.length || 0,
       icon: <FaWarehouse />,
       color: "bg-amber-500",
+       path: "/admin/inventory",
     },
     {
       title: "Expired Medicines",
       value: dashboard.expiredMedicines?.length || 0,
       icon: <FaExclamationTriangle />,
       color: "bg-rose-500",
+       path: "/admin/inventory",
     },
   ];
 
@@ -163,6 +171,7 @@ export default function Dashboard() {
         {cards.map((card, index) => (
           <div
             key={index}
+            onClick={() => navigate(card.path)}
             className="group rounded-xl border border-stone-200 bg-[#faf9f6] px-4 py-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-md"
           >
             <div className="flex items-center justify-between gap-2">
