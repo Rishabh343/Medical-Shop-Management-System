@@ -94,9 +94,7 @@ export default function InventoryProvider({ children }) {
   const getLowStock = async () => {
     try {
       setLoading(true);
-
       const response = await api.get("/inventory/low-stock");
-
       setInventory(response.data.data);
     } catch (error) {
       console.log(error);

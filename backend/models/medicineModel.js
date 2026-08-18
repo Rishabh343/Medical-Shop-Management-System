@@ -32,9 +32,9 @@ const medicineSchema = new mongoose.Schema(
       trim: true,
     },
     reorderLevel: {
-      type: String,
-
-      trim: true,
+      type: Number,
+      default: 0,
+      min: 0,
     },
     manufacturingDate: {
       type: Date,

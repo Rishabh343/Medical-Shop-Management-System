@@ -253,7 +253,38 @@ export const adjustStock = async (req, res) => {
 export const getLowStock = async (req, res) => {
   try {
     const medicines = await medicineModel
-      .find({ $expr: { $lte: ["$stockQuantity", "$reorderLevel"] } })
+      .find({
+        $expr: {
+          $and: [
+            {
+              $lte: [
+                "$stockQuantity",
+                {
+                  $convert: {
+                    input: "$reorderLevel",
+                    to: "int",
+                    onError: 0,
+                    onNull: 0,
+                  },
+                },
+              ],
+            },
+            {
+              $gt: [
+                {
+                  $convert: {
+                    input: "$reorderLevel",
+                    to: "int",
+                    onError: 0,
+                    onNull: 0,
+                  },
+                },
+                0,
+              ],
+            },
+          ],
+        },
+      })
       .select("-medicineImage")
       .populate("supplier", "supplierName");
 
