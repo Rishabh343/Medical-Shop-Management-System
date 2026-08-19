@@ -7,7 +7,7 @@ export const auth = (req, res, next) => {
         message: "No token found",
       });
     }
-    const decorded = jwt.verify(token, "secretkey");
+    const decorded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
     req.user = decorded;
     next();
   } catch (error) {

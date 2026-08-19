@@ -55,6 +55,35 @@ export default function UserProvider({ children }) {
       setLoading(false);
     }
   };
+const updateProfile = async (formData) => {
+  try {
+    setLoading(true);
+
+    const response = await api.put(
+      "/user/update-profile",
+      formData
+    );
+
+    return response.data.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  } finally {
+    setLoading(false);
+  }
+};
+ const getProfile = async (formData) => {
+    try {
+      setLoading(true);
+      const response = await api.get("/user/get-profile");
+
+      return response.data.data;
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
   const forgotPassword = async (email) => {
     try {
       setLoading(true);
@@ -112,6 +141,8 @@ export default function UserProvider({ children }) {
         loading,
         registerUser,
         loginUser,
+        getProfile,
+        updateProfile,
         forgotPassword,
         getUsers,
         searchUser,

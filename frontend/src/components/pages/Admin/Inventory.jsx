@@ -65,7 +65,6 @@ export default function Inventory() {
     }
   };
   useEffect(() => {
-    // Set a timer to wait 500ms after the user stops typing
     const delayDebounceFn = setTimeout(() => {
       if (search.trim() === "") {
         getInventory();
@@ -73,10 +72,9 @@ export default function Inventory() {
         searchInventory(search);
       }
     }, 500);
-
-    // Cleanup: If the user types again before 500ms, destroy the old timer
     return () => clearTimeout(delayDebounceFn);
-  }, [search]); // This runs every time 'search' changes
+  }, [search]);
+
   const handleStockIn = (item) => {
     setSelectedStockItem(item);
     setStockAction("in");
@@ -97,7 +95,6 @@ export default function Inventory() {
     await getStockMovementHistory(item._id);
   };
 
-  // Filter the global stock movements for the currently selected inventory item
   const currentItemHistory =
     stockMovement?.filter(
       (mov) =>
@@ -546,7 +543,12 @@ export default function Inventory() {
                 <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">
                   Batch
                 </th>
-
+                <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                  Company
+                </th>
+                <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                  Supplier
+                </th>
                 <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-stone-500">
                   Stock
                 </th>
@@ -580,12 +582,22 @@ export default function Inventory() {
                       <p className="text-sm font-semibold text-stone-900">
                         {item.medicineName}
                       </p>
+                      {item.genericName && (
+                        <p className="mt-1 text-xs text-stone-400">
+                          {item.genericName}
+                        </p>
+                      )}
                     </td>
 
                     <td className="px-5 py-4 text-sm text-stone-600">
                       {item.batchNumber}
                     </td>
-
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {item.company}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-stone-600">
+                      {item.supplier?.supplierName || "N/A"}
+                    </td>
                     <td className="px-5 py-4 text-center">
                       <span className="inline-flex min-w-10 justify-center rounded-full bg-stone-100 px-3 py-1.5 text-xs font-semibold text-stone-700">
                         {item.stockQuantity}
@@ -711,7 +723,7 @@ export default function Inventory() {
           </table>
         </div>
 
-        {totalPages > 1 && (
+        {totalPages > 1 && fetchInventory && (
           <div className="border-t border-stone-200 px-5 py-4">
             <Pagination
               currentPage={currentPage}

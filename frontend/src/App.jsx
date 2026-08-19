@@ -19,6 +19,7 @@ import LandingPage from "./components/pages/LandingPage";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 
 import { Toaster } from "react-hot-toast";
+import UpdateProfile from "./components/pages/Admin/UpdateProfile";
 
 function App() {
   return (
@@ -130,7 +131,15 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          //update profile for both
+          <Route
+            path="/update-profile"
+            element={
+              <ProtectedRoute allowedRoles={["Admin", "Pharmacist"]}>
+                <UpdateProfile />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/pharmacist/medicine"
             element={

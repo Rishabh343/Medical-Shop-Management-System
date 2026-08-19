@@ -13,6 +13,9 @@ export const getAllInventory = async (req, res) => {
     const inventory = await medicineModel
       .find()
       .populate("supplier", "supplierName")
+      .select(
+        "-purchasePrice -sellingPrice -gstPercentage -medicineImage -description -stockIn -stockOut",
+      )
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);

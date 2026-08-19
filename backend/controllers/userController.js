@@ -8,7 +8,6 @@ export const Register = async (req, res) => {
   try {
     const { name, email, role, age, phone, password } = req.body;
 
-   
     if (age < 18) {
       return res.status(400).json({
         status: false,
@@ -101,10 +100,12 @@ export const login = async (req, res) => {
       },
     );
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -123,7 +124,57 @@ export const login = async (req, res) => {
     });
   }
 };
+export const getProfile = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
 
+    res.status(200).json({
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, phone, email, address } = req.body;
+
+    const updatedData = {
+      name,
+      phone,
+      email,
+    };
+
+    // if (req.file) {
+    //   const uploadResult = await uploadToCloudinary(
+    //     req.file.buffer,
+    //     "estate/profiles",
+    //   );
+    //   updatedData.profileImage = uploadResult.secure_url;
+    // }
+
+    const updatedUser = await userModel
+      .findByIdAndUpdate(req.user.id, updatedData, { new: true })
+      .select("-password");
+
+    res.status(200).json({
+      status: true,
+      message: "Profile updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+};
 export const getAllUsers = async (req, res) => {
   try {
     const users = await userModel.find();

@@ -37,12 +37,10 @@ export default function Medicines() {
   const [category, setCategory] = useState("");
   const [company, setCompany] = useState("");
   const [selectedSupplier, setSelectedSupplier] = useState("");
-  // Search States
   const [search, setSearch] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  // Modal States
   const [openModal, setOpenModal] = useState(false);
   const [editing, setEditing] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
